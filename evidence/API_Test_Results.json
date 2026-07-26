@@ -1,0 +1,260 @@
+{
+  "project": "SmartStock Inventory and Sales Management System",
+  "executed_at": "2026-07-25T22:40:49.390Z",
+  "environment": {
+    "runtime": "v24.18.0",
+    "database": "Isolated temporary SQLite database",
+    "transport": "HTTP on an ephemeral local port"
+  },
+  "summary": {
+    "total": 27,
+    "passed": 27,
+    "failed": 0,
+    "pass_rate": "100.0%"
+  },
+  "results": [
+    {
+      "id": "TC-01",
+      "api": "POST /api/auth/login",
+      "scenario": "Admin logs in with valid credentials",
+      "expected": "200 and authentication token",
+      "actual": "200; role=admin; token returned",
+      "status": "Pass",
+      "duration_ms": 37
+    },
+    {
+      "id": "TC-02",
+      "api": "POST /api/auth/login",
+      "scenario": "Employee logs in with valid credentials",
+      "expected": "200 and employee role",
+      "actual": "200; employee session created",
+      "status": "Pass",
+      "duration_ms": 19
+    },
+    {
+      "id": "TC-03",
+      "api": "POST /api/auth/login",
+      "scenario": "Login with an incorrect password",
+      "expected": "401 Unauthorized",
+      "actual": "401; Incorrect email or password",
+      "status": "Pass",
+      "duration_ms": 20
+    },
+    {
+      "id": "TC-04",
+      "api": "GET /api/products",
+      "scenario": "Request protected data without a token",
+      "expected": "401 Authentication required",
+      "actual": "401; Authentication required",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-05",
+      "api": "GET /api/products",
+      "scenario": "Admin retrieves the product catalog",
+      "expected": "200 and seeded catalog",
+      "actual": "200; 8 products returned",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-06",
+      "api": "POST /api/products",
+      "scenario": "Employee attempts to create a product",
+      "expected": "403 Forbidden",
+      "actual": "403; You do not have permission to perform this action",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-07",
+      "api": "POST /api/products",
+      "scenario": "Admin creates a valid product",
+      "expected": "201 and created product",
+      "actual": "201; product id=9",
+      "status": "Pass",
+      "duration_ms": 3
+    },
+    {
+      "id": "TC-08",
+      "api": "POST /api/products",
+      "scenario": "Admin submits a duplicate SKU",
+      "expected": "400 SKU already exists",
+      "actual": "400; SKU already exists",
+      "status": "Pass",
+      "duration_ms": 1
+    },
+    {
+      "id": "TC-09",
+      "api": "GET /api/products?search=",
+      "scenario": "Search catalog by SKU",
+      "expected": "200 and one matching product",
+      "actual": "200; matched API Test Scarf",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-10",
+      "api": "PUT /api/products/:id",
+      "scenario": "Admin updates product quantity and price",
+      "expected": "200 with updated values",
+      "actual": "200; quantity=12; price=30",
+      "status": "Pass",
+      "duration_ms": 3
+    },
+    {
+      "id": "TC-11",
+      "api": "GET /api/products/low-stock",
+      "scenario": "Retrieve low-stock products",
+      "expected": "200 and threshold-filtered list",
+      "actual": "200; 2 low-stock products",
+      "status": "Pass",
+      "duration_ms": 1
+    },
+    {
+      "id": "TC-12",
+      "api": "POST /api/sales",
+      "scenario": "Record a valid sale",
+      "expected": "201, server-calculated total, stock reduced",
+      "actual": "201; total=60; stock reduced from 12 to 10",
+      "status": "Pass",
+      "duration_ms": 4
+    },
+    {
+      "id": "TC-13",
+      "api": "POST /api/sales",
+      "scenario": "Attempt sale greater than available stock",
+      "expected": "400 Insufficient stock",
+      "actual": "400; Insufficient stock",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-14",
+      "api": "GET /api/sales",
+      "scenario": "Retrieve sales history",
+      "expected": "200 and recorded sale",
+      "actual": "200; 1 sale returned",
+      "status": "Pass",
+      "duration_ms": 1
+    },
+    {
+      "id": "TC-15",
+      "api": "GET /api/sales/report",
+      "scenario": "Retrieve aggregated dashboard report",
+      "expected": "200 with revenue and inventory metrics",
+      "actual": "200; revenue=60; units=2",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-16",
+      "api": "POST /api/orders",
+      "scenario": "Admin creates an international order",
+      "expected": "201 and order record",
+      "actual": "201; order id=4",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-17",
+      "api": "PUT /api/orders/:id",
+      "scenario": "Admin updates order status",
+      "expected": "200 and In Transit status",
+      "actual": "200; status=In Transit",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-18",
+      "api": "POST /api/customers",
+      "scenario": "Admin creates a customer",
+      "expected": "201 and customer record",
+      "actual": "201; customer id=4",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-19",
+      "api": "PUT /api/settings",
+      "scenario": "Admin updates store settings",
+      "expected": "200 and saved currency",
+      "actual": "200; default threshold=6; currency=USD",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-20",
+      "api": "POST /api/auth/register",
+      "scenario": "Admin creates a staff account",
+      "expected": "201 and employee user",
+      "actual": "201; user id=3; role=employee",
+      "status": "Pass",
+      "duration_ms": 20
+    },
+    {
+      "id": "TC-21",
+      "api": "DELETE /api/products/:id",
+      "scenario": "Delete product that has sales history",
+      "expected": "409 Conflict",
+      "actual": "409; Products with sales history cannot be deleted",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-22",
+      "api": "DELETE /api/products/:id",
+      "scenario": "Admin deletes product without sales history",
+      "expected": "200 and deleted id",
+      "actual": "200; deleted product id=10",
+      "status": "Pass",
+      "duration_ms": 3
+    },
+    {
+      "id": "TC-23",
+      "api": "GET /api/auth/me",
+      "scenario": "Retrieve the authenticated administrator profile",
+      "expected": "200 and current admin user",
+      "actual": "200; user=admin@smartstock.com; role=admin",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-24",
+      "api": "GET /api/orders",
+      "scenario": "Retrieve the order register",
+      "expected": "200 and created order included",
+      "actual": "200; 4 orders returned; created order found",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-25",
+      "api": "GET /api/customers",
+      "scenario": "Retrieve the customer directory",
+      "expected": "200 and created customer included",
+      "actual": "200; 4 customers returned; created customer found",
+      "status": "Pass",
+      "duration_ms": 1
+    },
+    {
+      "id": "TC-26",
+      "api": "GET /api/settings",
+      "scenario": "Retrieve current store settings",
+      "expected": "200 and updated settings returned",
+      "actual": "200; store=Indigo Trail Studio; threshold=6",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-27",
+      "api": "POST /api/auth/logout",
+      "scenario": "Admin logs out",
+      "expected": "200 and session invalidated",
+      "actual": "200 logout; former session returns 401",
+      "status": "Pass",
+      "duration_ms": 4
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+node_modules/
+client/dist/
+server/database/*.db
+server/database/*.db-shm
+server/database/*.db-wal
+.env
+.env.*
+.DS_Store
+*.log
+coverage/
+.vite/
+server/tests/api-test-results.json
