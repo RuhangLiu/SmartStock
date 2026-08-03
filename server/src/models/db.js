@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS products (
   price REAL NOT NULL DEFAULT 0,
   quantity INTEGER NOT NULL DEFAULT 0,
   low_stock_threshold INTEGER NOT NULL DEFAULT 5,
+  image_url TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -98,6 +99,7 @@ addColumnIfMissing('products', 'origin', 'TEXT');
 addColumnIfMissing('products', 'material', 'TEXT');
 addColumnIfMissing('products', 'dye_technique', 'TEXT');
 addColumnIfMissing('products', 'cost', 'REAL NOT NULL DEFAULT 0');
+addColumnIfMissing('products', 'image_url', 'TEXT');
 addColumnIfMissing('sales', 'destination_region', "TEXT DEFAULT 'United States'");
 addColumnIfMissing('sales', 'sales_channel', "TEXT DEFAULT 'Online Store'");
 
@@ -123,18 +125,18 @@ const seedTransaction = () => {
     if (productCount === 0) {
       const insertProduct = db.prepare(`
         INSERT INTO products
-          (sku, name, origin, material, dye_technique, category, price, cost, quantity, low_stock_threshold)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          (sku, name, origin, material, dye_technique, category, price, cost, quantity, low_stock_threshold, image_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       const products = [
-        ['DW-SCF-001', 'Cloud-Dyed Silk Scarf', 'Dali, Yunnan', 'Mulberry Silk', 'Bound Resist', 'Accessories', 48, 19, 4, 5],
-        ['DW-TOT-002', 'Ocean Shibori Tote', 'Dali, Yunnan', 'Cotton Canvas', 'Stitched Resist', 'Bags', 72, 28, 5, 5],
-        ['DW-CSH-003', 'Indigo Linen Cushion', 'Nantong, Jiangsu', 'Linen Blend', 'Fold Resist', 'Home Textiles', 58, 23, 18, 8],
-        ['DW-RUN-004', 'Starlight Table Runner', 'Zhoucheng, Yunnan', 'Cotton Linen', 'Star Binding', 'Table Linens', 86, 34, 24, 8],
-        ['DW-KMN-005', 'Moonfold Cotton Kimono', 'Dali, Yunnan', 'Organic Cotton', 'Fold Resist', 'Apparel', 128, 52, 12, 6],
-        ['DW-NPK-006', 'Indigo Napkin Set', 'Nantong, Jiangsu', 'Linen', 'Bound Resist', 'Table Linens', 42, 16, 36, 10],
-        ['DW-WAL-007', 'Tidal Wall Hanging', 'Zhoucheng, Yunnan', 'Cotton', 'Stitched Resist', 'Home Textiles', 112, 44, 7, 5],
-        ['DW-POU-008', 'Wave-Dyed Travel Pouch', 'Dali, Yunnan', 'Cotton Canvas', 'Pole Wrap', 'Accessories', 35, 13, 43, 12]
+        ['DW-SCF-001', 'Cloud-Dyed Silk Scarf', 'Dali, Yunnan', 'Mulberry Silk', 'Bound Resist', 'Accessories', 48, 19, 4, 5, '/assets/products/cloud-scarf.jpg'],
+        ['DW-TOT-002', 'Ocean Shibori Tote', 'Dali, Yunnan', 'Cotton Canvas', 'Stitched Resist', 'Bags', 72, 28, 5, 5, '/assets/products/ocean-tote.jpg'],
+        ['DW-CSH-003', 'Indigo Linen Cushion', 'Nantong, Jiangsu', 'Linen Blend', 'Fold Resist', 'Home Textiles', 58, 23, 18, 8, '/assets/products/indigo-cushion.jpg'],
+        ['DW-RUN-004', 'Starlight Table Runner', 'Zhoucheng, Yunnan', 'Cotton Linen', 'Star Binding', 'Table Linens', 86, 34, 24, 8, '/assets/products/table-runner.jpg'],
+        ['DW-KMN-005', 'Moonfold Cotton Kimono', 'Dali, Yunnan', 'Organic Cotton', 'Fold Resist', 'Apparel', 128, 52, 12, 6, '/assets/products/cotton-kimono.jpg'],
+        ['DW-NPK-006', 'Indigo Napkin Set', 'Nantong, Jiangsu', 'Linen', 'Bound Resist', 'Table Linens', 42, 16, 36, 10, '/assets/products/napkin-set.jpg'],
+        ['DW-WAL-007', 'Tidal Wall Hanging', 'Zhoucheng, Yunnan', 'Cotton', 'Stitched Resist', 'Home Textiles', 112, 44, 7, 5, '/assets/products/wall-hanging.jpg'],
+        ['DW-POU-008', 'Wave-Dyed Travel Pouch', 'Dali, Yunnan', 'Cotton Canvas', 'Pole Wrap', 'Accessories', 35, 13, 43, 12, '/assets/products/travel-pouch.jpg']
       ];
       products.forEach((product) => insertProduct.run(...product));
     }
@@ -175,5 +177,21 @@ const seedTransaction = () => {
 };
 
 seedTransaction();
+
+const productImages = [
+  ['DW-SCF-001', '/assets/products/cloud-scarf.jpg'],
+  ['DW-TOT-002', '/assets/products/ocean-tote.jpg'],
+  ['DW-CSH-003', '/assets/products/indigo-cushion.jpg'],
+  ['DW-RUN-004', '/assets/products/table-runner.jpg'],
+  ['DW-KMN-005', '/assets/products/cotton-kimono.jpg'],
+  ['DW-NPK-006', '/assets/products/napkin-set.jpg'],
+  ['DW-WAL-007', '/assets/products/wall-hanging.jpg'],
+  ['DW-POU-008', '/assets/products/travel-pouch.jpg']
+];
+const setProductImage = db.prepare(`
+  UPDATE products SET image_url = ?
+  WHERE sku = ? AND (image_url IS NULL OR image_url = '')
+`);
+productImages.forEach(([sku, imageUrl]) => setProductImage.run(imageUrl, sku));
 
 module.exports = { db, hashPassword };

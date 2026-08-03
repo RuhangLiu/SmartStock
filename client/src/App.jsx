@@ -19,7 +19,9 @@ import {
   getMe,
   getStoredToken,
   login,
-  logout
+  logout,
+  signup,
+  storeToken
 } from './services/api';
 import './App.css';
 
@@ -45,17 +47,32 @@ const pageMeta = {
   settings: ['Store Settings', 'Workspace and account configuration']
 };
 
-function LoginScreen({ onLogin }) {
-  const [form, setForm] = useState({ email: 'admin@smartstock.com', password: 'admin123' });
+function AuthScreen({ onLogin, onSignup }) {
+  const [mode, setMode] = useState('login');
+  const [form, setForm] = useState({ name: '', email: 'admin@smartstock.com', password: 'admin123', confirmPassword: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const isSignup = mode === 'signup';
+
+  const switchMode = (nextMode) => {
+    setMode(nextMode);
+    setError('');
+    setForm(nextMode === 'signup'
+      ? { name: '', email: '', password: '', confirmPassword: '' }
+      : { name: '', email: 'admin@smartstock.com', password: 'admin123', confirmPassword: '' });
+  };
 
   const submit = async (event) => {
     event.preventDefault();
     setBusy(true);
     setError('');
     try {
-      await onLogin(form);
+      if (isSignup) {
+        if (form.password !== form.confirmPassword) throw new Error('Passwords do not match');
+        await onSignup({ name: form.name, email: form.email, password: form.password });
+      } else {
+        await onLogin({ email: form.email, password: form.password });
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -80,18 +97,25 @@ function LoginScreen({ onLogin }) {
       </section>
       <section className="login-form-panel">
         <form className="login-form" onSubmit={submit}>
-          <p className="overline">WELCOME BACK</p>
-          <h2>Sign in to SmartStock</h2>
-          <p className="form-note">Use your staff account to access the store workspace.</p>
+          <div className="auth-tabs" role="tablist" aria-label="Account access">
+            <button type="button" className={!isSignup ? 'active' : ''} onClick={() => switchMode('login')}>Sign In</button>
+            <button type="button" className={isSignup ? 'active' : ''} onClick={() => switchMode('signup')}>Create Account</button>
+          </div>
+          <p className="overline">{isSignup ? 'JOIN THE WORKSPACE' : 'WELCOME BACK'}</p>
+          <h2>{isSignup ? 'Create your SmartStock account' : 'Sign in to SmartStock'}</h2>
+          <p className="form-note">{isSignup ? 'Register as a store employee to access inventory and sales tools.' : 'Use your staff account to access the store workspace.'}</p>
+          {isSignup && <label>Full name<input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Your full name" required /></label>}
           <label>Email address<input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required /></label>
-          <label>Password<input type="password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} required /></label>
+          <label>Password<input type="password" minLength="8" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder={isSignup ? 'At least 8 characters' : ''} required /></label>
+          {isSignup && <label>Confirm password<input type="password" minLength="8" value={form.confirmPassword} onChange={(event) => setForm({ ...form, confirmPassword: event.target.value })} required /></label>}
           {error && <div className="message error">{error}</div>}
-          <button className="primary-button full-button" disabled={busy}>{busy ? 'Signing in…' : 'Sign In →'}</button>
-          <div className="demo-accounts">
+          <button className="primary-button full-button" disabled={busy}>{busy ? (isSignup ? 'Creating account…' : 'Signing in…') : (isSignup ? 'Create Account →' : 'Sign In →')}</button>
+          {!isSignup && <div className="demo-accounts">
             <strong>Demo accounts</strong>
             <span>Admin: admin@smartstock.com / admin123</span>
             <span>Employee: employee@smartstock.com / employee123</span>
-          </div>
+          </div>}
+          {isSignup && <p className="signup-note">New accounts use the employee role. An administrator can promote or manage staff access.</p>}
         </form>
       </section>
     </main>
@@ -144,7 +168,13 @@ function App() {
 
   const handleLogin = async (credentials) => {
     const result = await login(credentials);
-    localStorage.setItem('smartstock_auth_token', result.token);
+    storeToken(result.token);
+    setUser(result.user);
+  };
+
+  const handleSignup = async (details) => {
+    const result = await signup(details);
+    storeToken(result.token);
     setUser(result.user);
   };
 
@@ -156,10 +186,10 @@ function App() {
   };
 
   const exportInventory = () => {
-    const headers = ['SKU', 'Product', 'Origin', 'Material', 'Dye Technique', 'Category', 'Price USD', 'Cost USD', 'Quantity', 'Threshold'];
+    const headers = ['SKU', 'Product', 'Origin', 'Material', 'Dye Technique', 'Category', 'Price USD', 'Cost USD', 'Quantity', 'Threshold', 'Image URL'];
     const rows = data.products.map((product) => [
       product.sku, product.name, product.origin, product.material, product.dye_technique,
-      product.category, product.price, product.cost, product.quantity, product.low_stock_threshold
+      product.category, product.price, product.cost, product.quantity, product.low_stock_threshold, product.image_url
     ]);
     const csv = [headers, ...rows].map((row) =>
       row.map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`).join(',')
@@ -185,7 +215,7 @@ function App() {
   }, [currentPage, data, loading, user, loadData, notify]);
 
   if (booting) return <div className="app-loader">Loading SmartStock…</div>;
-  if (!user) return <LoginScreen onLogin={handleLogin} />;
+  if (!user) return <AuthScreen onLogin={handleLogin} onSignup={handleSignup} />;
 
   return (
     <div className="app-shell">

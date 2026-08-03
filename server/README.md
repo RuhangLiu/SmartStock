@@ -21,6 +21,8 @@ Demo accounts:
 - Administrator: `admin@smartstock.com` / `admin123`
 - Employee: `employee@smartstock.com` / `employee123`
 
+New staff can also create an employee account through `POST /api/auth/signup` or the frontend registration screen. Administrator accounts can only be created by an authenticated administrator.
+
 ## Run the automated API tests
 
 ```bash
@@ -62,6 +64,7 @@ The SQLite database is created automatically at `database/smartstock.db` on firs
 - Roles are limited to `admin` and `employee`.
 - Passwords are stored as salted scrypt hashes.
 - Product SKU values are unique.
+- Product records support local or remote catalog images through `image_url`.
 - Sale totals are calculated from the database product price.
 - Sale creation and inventory reduction use a single database transaction.
 - Products with sales history cannot be deleted.
