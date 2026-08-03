@@ -26,6 +26,8 @@ async function request(path, options = {}) {
 
 export const login = (credentials) =>
   request('/auth/login', { method: 'POST', body: JSON.stringify(credentials) });
+export const signup = (details) =>
+  request('/auth/signup', { method: 'POST', body: JSON.stringify(details) });
 export const getMe = () => request('/auth/me');
 export const logout = () => request('/auth/logout', { method: 'POST' });
 export const registerUser = (user) =>

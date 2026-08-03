@@ -2,7 +2,7 @@ const { db } = require('../models/db');
 
 const productFields = `
   id, sku, name, origin, material, dye_technique, category, price, cost,
-  quantity, low_stock_threshold, created_at, updated_at
+  quantity, low_stock_threshold, image_url, created_at, updated_at
 `;
 
 function normalizeProduct(body) {
@@ -16,7 +16,8 @@ function normalizeProduct(body) {
     price: Number(body.price),
     cost: Number(body.cost),
     quantity: Number(body.quantity),
-    low_stock_threshold: Number(body.low_stock_threshold)
+    low_stock_threshold: Number(body.low_stock_threshold),
+    image_url: String(body.image_url || '').trim()
   };
 }
 
@@ -55,11 +56,12 @@ exports.addProduct = (req, res) => {
   try {
     const info = db.prepare(`
       INSERT INTO products
-        (sku, name, origin, material, dye_technique, category, price, cost, quantity, low_stock_threshold)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (sku, name, origin, material, dye_technique, category, price, cost, quantity, low_stock_threshold, image_url)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       product.sku, product.name, product.origin, product.material, product.dye_technique,
-      product.category, product.price, product.cost, product.quantity, product.low_stock_threshold
+      product.category, product.price, product.cost, product.quantity, product.low_stock_threshold,
+      product.image_url
     );
     const created = db.prepare(`SELECT ${productFields} FROM products WHERE id = ?`).get(info.lastInsertRowid);
     res.status(201).json({ success: true, data: created });
@@ -78,11 +80,12 @@ exports.editProduct = (req, res) => {
     const info = db.prepare(`
       UPDATE products SET
         sku = ?, name = ?, origin = ?, material = ?, dye_technique = ?, category = ?,
-        price = ?, cost = ?, quantity = ?, low_stock_threshold = ?, updated_at = datetime('now')
+        price = ?, cost = ?, quantity = ?, low_stock_threshold = ?, image_url = ?, updated_at = datetime('now')
       WHERE id = ?
     `).run(
       product.sku, product.name, product.origin, product.material, product.dye_technique,
       product.category, product.price, product.cost, product.quantity, product.low_stock_threshold,
+      product.image_url,
       Number(req.params.id)
     );
     if (Number(info.changes) === 0) return res.status(404).json({ success: false, message: 'Product not found' });
