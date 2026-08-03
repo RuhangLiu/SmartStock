@@ -4,7 +4,7 @@ import { money, stockStatus } from '../utils';
 
 const emptyForm = {
   sku: '', name: '', origin: '', material: '', dye_technique: '', category: '',
-  price: '', cost: '', quantity: '', low_stock_threshold: '5'
+  price: '', cost: '', quantity: '', low_stock_threshold: '5', image_url: ''
 };
 
 function ProductsPage({ products, user, onRefresh, notify }) {
@@ -55,22 +55,30 @@ function ProductsPage({ products, user, onRefresh, notify }) {
       </section>
       <section className="panel data-panel">
         <div className="panel-heading"><div><p className="overline">GLOBAL CATALOG</p><h3>Products <span className="muted-count">{filtered.length}</span></h3></div><span className="catalog-chip">USD CATALOG</span></div>
-        <div className="table-wrap">
-          <table>
-            <thead><tr><th>SKU</th><th>Product</th><th>Origin</th><th>Category</th><th>Price</th><th>Cost</th><th>Stock</th><th>Status</th>{user.role === 'admin' && <th>Actions</th>}</tr></thead>
-            <tbody>
-              {filtered.map((product) => {
-                const status = stockStatus(product);
-                return <tr key={product.id}>
-                  <td><strong className="sku">{product.sku}</strong></td>
-                  <td><div className="table-product"><span>{product.name[0]}</span><div><strong>{product.name}</strong><small>{product.material} · {product.dye_technique}</small></div></div></td>
-                  <td>{product.origin || '—'}</td><td>{product.category}</td><td>{money(product.price)}</td><td>{money(product.cost)}</td>
-                  <td><strong>{product.quantity}</strong></td><td><span className={`status ${status.className}`}>{status.label}</span></td>
-                  {user.role === 'admin' && <td><div className="row-actions"><button onClick={() => openEdit(product)}>Edit</button><button className="delete" onClick={() => remove(product)}>Delete</button></div></td>}
-                </tr>;
-              })}
-            </tbody>
-          </table>
+        <div className="product-card-grid">
+          {filtered.map((product) => {
+            const status = stockStatus(product);
+            return <article className="product-catalog-card" key={product.id}>
+              <div className="product-photo">
+                <img src={product.image_url || '/assets/products/cloud-scarf.jpg'} alt={product.name} onError={(event) => { event.currentTarget.src = '/assets/products/cloud-scarf.jpg'; }} />
+                <span className={`status ${status.className}`}>{status.label}</span>
+              </div>
+              <div className="product-card-content">
+                <div className="product-card-kicker"><strong className="sku">{product.sku}</strong><span>{product.category}</span></div>
+                <h3>{product.name}</h3>
+                <p>{product.material || 'Handcrafted textile'} · {product.dye_technique || 'Artisan dye'}</p>
+                <div className="product-card-stats">
+                  <div><small>Retail</small><strong>{money(product.price)}</strong></div>
+                  <div><small>Cost</small><strong>{money(product.cost)}</strong></div>
+                  <div><small>Stock</small><strong>{product.quantity}</strong></div>
+                </div>
+                <div className="product-card-footer">
+                  <span>⌖ {product.origin || 'Origin not set'}</span>
+                  {user.role === 'admin' && <div className="row-actions"><button onClick={() => openEdit(product)}>Edit</button><button className="delete" onClick={() => remove(product)}>Delete</button></div>}
+                </div>
+              </div>
+            </article>;
+          })}
           {!filtered.length && <p className="empty-state">No products match your search.</p>}
         </div>
       </section>
@@ -89,7 +97,9 @@ function ProductsPage({ products, user, onRefresh, notify }) {
             <label>Cost (USD)<input type="number" min="0" step=".01" value={form.cost} onChange={(event) => setForm({ ...form, cost: event.target.value })} required /></label>
             <label>Quantity<input type="number" min="0" value={form.quantity} onChange={(event) => setForm({ ...form, quantity: event.target.value })} required /></label>
             <label>Low-Stock Threshold<input type="number" min="0" value={form.low_stock_threshold} onChange={(event) => setForm({ ...form, low_stock_threshold: event.target.value })} required /></label>
+            <label className="wide-field">Product Image URL<input value={form.image_url || ''} onChange={(event) => setForm({ ...form, image_url: event.target.value })} placeholder="/assets/products/cloud-scarf.jpg or https://…" /></label>
           </div>
+          {form.image_url && <div className="product-image-preview"><img src={form.image_url} alt="Product preview" /><div><strong>Image preview</strong><small>Use a square product image for the best result.</small></div></div>}
           {error && <div className="message error">{error}</div>}
           <div className="modal-actions"><button type="button" className="secondary-button" onClick={() => setShowForm(false)}>Cancel</button><button className="primary-button">{editing ? 'Save Changes' : 'Add Product'}</button></div>
         </form>

@@ -31,6 +31,32 @@ exports.login = (req, res) => {
   });
 };
 
+exports.signup = (req, res) => {
+  const name = String(req.body.name || '').trim();
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const password = String(req.body.password || '');
+  if (!name || !email || password.length < 8) {
+    return res.status(400).json({ success: false, message: 'Name, email, and an 8-character password are required' });
+  }
+
+  try {
+    const info = db.prepare(`
+      INSERT INTO users (name, email, password_hash, role)
+      VALUES (?, ?, ?, 'employee')
+    `).run(name, email, hashPassword(password));
+    const user = db.prepare('SELECT id, name, email, role FROM users WHERE id = ?').get(info.lastInsertRowid);
+    const token = randomBytes(32).toString('hex');
+    db.prepare(`
+      INSERT INTO sessions (token, user_id, expires_at)
+      VALUES (?, ?, datetime('now', '+7 days'))
+    `).run(token, user.id);
+    res.status(201).json({ success: true, data: { token, user } });
+  } catch (error) {
+    const message = error.message.includes('UNIQUE') ? 'Email already exists' : error.message;
+    res.status(400).json({ success: false, message });
+  }
+};
+
 exports.me = (req, res) => {
   res.json({ success: true, data: req.user });
 };

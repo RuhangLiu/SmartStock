@@ -4,13 +4,16 @@ SmartStock is an English-language capstone application for managing the products
 
 ## Capstone deliverables
 
-- 19 finalized REST API endpoints
+- 20 REST API endpoints: the 19 finalized capstone endpoints plus public employee signup
 - Expected input, output, sample JSON, access rules, and error behavior
 - SQLite database design with 7 tables and an entity relationship diagram
 - Bearer-token authentication with administrator and employee roles
 - Automated HTTP integration tests
 - 27 of 27 tests passed
 - Postman collection for manual API demonstration
+- English sign-in and employee registration interface
+- Image-enabled product catalog with eight original tie-dye product photographs
+- Responsive, readability-focused typography for desktop and mobile
 
 ## Technology
 
@@ -78,20 +81,22 @@ The test runner uses an isolated temporary SQLite database and an ephemeral loca
 
 | Group | Count | Capabilities |
 |---|---:|---|
-| Authentication | 4 | Login, current user, logout, staff registration |
+| Authentication | 5 | Public signup, login, current user, logout, administrator-managed staff registration |
 | Products | 5 | Catalog, search, low stock, create, update, delete |
 | Sales | 3 | Sales history, record sale, aggregated report |
 | Orders | 3 | List, create, update status |
 | Customers | 2 | List and create |
 | Settings | 2 | Read and update |
 
-All business endpoints require a bearer token. Administrative mutations are protected by role middleware.
+All protected business endpoints require a bearer token. Administrative mutations are protected by role middleware. Public signup creates an employee account and immediately returns an authenticated session.
 
 ## Database behavior
 
 - Passwords use salted scrypt hashes.
 - Sessions expire after seven days.
 - Product SKU values are unique.
+- Products can store an image URL used by the frontend catalog and editor preview.
+- The initial catalog contains eight curated tie-dye products; runtime demonstration data is not committed.
 - Sale totals are calculated using the product price stored in SQLite.
 - Recording a sale and reducing inventory occur in one transaction.
 - A product with sales history cannot be deleted.
