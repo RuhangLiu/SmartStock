@@ -62,6 +62,21 @@ Demo accounts:
 - Administrator: `admin@smartstock.com` / `admin123`
 - Employee: `employee@smartstock.com` / `employee123`
 
+## Azure App Service deployment
+
+The repository root is configured as a single Node.js 24 application for Azure App Service. The Azure build installs both workspaces, builds the React client into `client/dist`, and starts Express from `server/index.js`. Express serves the built frontend and the `/api` routes from the same origin.
+
+Use these App Service application settings:
+
+```text
+NODE_ENV=production
+SMARTSTOCK_DB_PATH=/home/data/smartstock.db
+WEBSITES_ENABLE_APP_SERVICE_STORAGE=true
+SCM_DO_BUILD_DURING_DEPLOYMENT=true
+```
+
+The `/home/data` path keeps the SQLite database on App Service persistent storage. The Free F1 plan should remain at one instance because SQLite is intended for this capstone demonstration workload, not multi-instance production scaling.
+
 ## Run the API test suite
 
 ```bash
