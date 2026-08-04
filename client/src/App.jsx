@@ -7,6 +7,7 @@ import OrdersPage from './pages/OrdersPage';
 import CustomersPage from './pages/CustomersPage';
 import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
+import { useI18n } from './i18n';
 import {
   clearToken,
   fetchCustomers,
@@ -47,7 +48,19 @@ const pageMeta = {
   settings: ['Store Settings', 'Workspace and account configuration']
 };
 
+function LanguageToggle({ className = '' }) {
+  const { language, setLanguage, t } = useI18n();
+  return (
+    <div className={`language-toggle ${className}`} role="group" aria-label={t('Switch interface language')}>
+      <button className={language === 'en' ? 'active' : ''} type="button" onClick={() => setLanguage('en')}>EN</button>
+      <span>/</span>
+      <button className={language === 'zh' ? 'active' : ''} type="button" onClick={() => setLanguage('zh')}>中文</button>
+    </div>
+  );
+}
+
 function AuthScreen({ onLogin, onSignup }) {
+  const { t } = useI18n();
   const [mode, setMode] = useState('login');
   const [form, setForm] = useState({ name: '', email: 'admin@smartstock.com', password: 'admin123', confirmPassword: '' });
   const [error, setError] = useState('');
@@ -74,7 +87,7 @@ function AuthScreen({ onLogin, onSignup }) {
         await onLogin({ email: form.email, password: form.password });
       }
     } catch (err) {
-      setError(err.message);
+      setError(t(err.message));
     } finally {
       setBusy(false);
     }
@@ -86,36 +99,37 @@ function AuthScreen({ onLogin, onSignup }) {
         <div className="dye-rings" />
         <div className="login-brand">
           <span className="brand-symbol">SS</span>
-          <span>SmartStock<small>TIE-DYE RETAIL OPERATIONS</small></span>
+          <span>SmartStock<small>{t('TIE-DYE RETAIL OPERATIONS')}</small></span>
         </div>
         <div>
-          <p className="overline light">INVENTORY · SALES · INSIGHT</p>
-          <h1>Run the store.<br />Respect the craft.</h1>
-          <p>One workspace for products, inventory, sales, and cross-border operations.</p>
+          <p className="overline light">{t('INVENTORY · SALES · INSIGHT')}</p>
+          <h1>{t('Run the store.')}<br />{t('Respect the craft.')}</h1>
+          <p>{t('One workspace for products, inventory, sales, and cross-border operations.')}</p>
         </div>
-        <p className="login-footnote">Indigo Trail Studio · Global Store</p>
+        <p className="login-footnote">Indigo Trail Studio · {t('Global Store')}</p>
       </section>
       <section className="login-form-panel">
-        <form className="login-form" onSubmit={submit}>
-          <div className="auth-tabs" role="tablist" aria-label="Account access">
-            <button type="button" className={!isSignup ? 'active' : ''} onClick={() => switchMode('login')}>Sign In</button>
-            <button type="button" className={isSignup ? 'active' : ''} onClick={() => switchMode('signup')}>Create Account</button>
+        <LanguageToggle className="auth-language-toggle" />
+        <form className={`login-form ${isSignup ? 'signup-form' : ''}`} onSubmit={submit}>
+          <div className="auth-tabs" role="tablist" aria-label={t('Account access')}>
+            <button type="button" className={!isSignup ? 'active' : ''} onClick={() => switchMode('login')}>{t('Sign In')}</button>
+            <button type="button" className={isSignup ? 'active' : ''} onClick={() => switchMode('signup')}>{t('Create Account')}</button>
           </div>
-          <p className="overline">{isSignup ? 'JOIN THE WORKSPACE' : 'WELCOME BACK'}</p>
-          <h2>{isSignup ? 'Create your SmartStock account' : 'Sign in to SmartStock'}</h2>
-          <p className="form-note">{isSignup ? 'Register as a store employee to access inventory and sales tools.' : 'Use your staff account to access the store workspace.'}</p>
-          {isSignup && <label>Full name<input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Your full name" required /></label>}
-          <label>Email address<input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required /></label>
-          <label>Password<input type="password" minLength="8" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder={isSignup ? 'At least 8 characters' : ''} required /></label>
-          {isSignup && <label>Confirm password<input type="password" minLength="8" value={form.confirmPassword} onChange={(event) => setForm({ ...form, confirmPassword: event.target.value })} required /></label>}
+          <p className="overline">{t(isSignup ? 'JOIN THE WORKSPACE' : 'WELCOME BACK')}</p>
+          <h2>{t(isSignup ? 'Create your SmartStock account' : 'Sign in to SmartStock')}</h2>
+          <p className="form-note">{t(isSignup ? 'Register as a store employee to access inventory and sales tools.' : 'Use your staff account to access the store workspace.')}</p>
+          {isSignup && <label>{t('Full name')}<input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder={t('Your full name')} required /></label>}
+          <label>{t('Email address')}<input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required /></label>
+          <label>{t('Password')}<input type="password" minLength="8" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder={isSignup ? t('At least 8 characters') : ''} required /></label>
+          {isSignup && <label>{t('Confirm password')}<input type="password" minLength="8" value={form.confirmPassword} onChange={(event) => setForm({ ...form, confirmPassword: event.target.value })} required /></label>}
           {error && <div className="message error">{error}</div>}
-          <button className="primary-button full-button" disabled={busy}>{busy ? (isSignup ? 'Creating account…' : 'Signing in…') : (isSignup ? 'Create Account →' : 'Sign In →')}</button>
+          <button className="primary-button full-button" disabled={busy}>{t(busy ? (isSignup ? 'Creating account…' : 'Signing in…') : (isSignup ? 'Create Account →' : 'Sign In →'))}</button>
           {!isSignup && <div className="demo-accounts">
-            <strong>Demo accounts</strong>
-            <span>Admin: admin@smartstock.com / admin123</span>
-            <span>Employee: employee@smartstock.com / employee123</span>
+            <strong>{t('Demo accounts')}</strong>
+            <span>{t('Admin')}: admin@smartstock.com / admin123</span>
+            <span>{t('Employee')}: employee@smartstock.com / employee123</span>
           </div>}
-          {isSignup && <p className="signup-note">New accounts use the employee role. An administrator can promote or manage staff access.</p>}
+          {isSignup && <p className="signup-note">{t('New accounts use the employee role. An administrator can promote or manage staff access.')}</p>}
         </form>
       </section>
     </main>
@@ -123,6 +137,7 @@ function AuthScreen({ onLogin, onSignup }) {
 }
 
 function App() {
+  const { t } = useI18n();
   const [user, setUser] = useState(null);
   const [booting, setBooting] = useState(Boolean(getStoredToken()));
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -148,11 +163,11 @@ function App() {
       setData({ products, lowStock, sales, orders, customers, report, settings });
     } catch (error) {
       if (!getStoredToken()) setUser(null);
-      else notify(error.message);
+      else notify(t(error.message));
     } finally {
       setLoading(false);
     }
-  }, [notify]);
+  }, [notify, t]);
 
   useEffect(() => {
     if (!getStoredToken()) return;
@@ -199,7 +214,7 @@ function App() {
     link.download = `smartstock-inventory-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
-    notify('Inventory CSV exported');
+    notify(t('Inventory CSV exported'));
   };
 
   const content = useMemo(() => {
@@ -214,40 +229,41 @@ function App() {
     return <DashboardPage {...common} onNavigate={setCurrentPage} />;
   }, [currentPage, data, loading, user, loadData, notify]);
 
-  if (booting) return <div className="app-loader">Loading SmartStock…</div>;
+  if (booting) return <div className="app-loader">{t('Loading SmartStock…')}</div>;
   if (!user) return <AuthScreen onLogin={handleLogin} onSignup={handleSignup} />;
 
   return (
     <div className="app-shell">
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <button className="sidebar-close" onClick={() => setSidebarOpen(false)} aria-label="Close menu">×</button>
-        <div className="app-brand"><span className="brand-symbol">SS</span><span>SmartStock<small>TIE-DYE RETAIL OPS</small></span></div>
-        <p className="nav-label">WORKSPACE</p>
+        <button className="sidebar-close" onClick={() => setSidebarOpen(false)} aria-label={t('Close menu')}>×</button>
+        <div className="app-brand"><span className="brand-symbol">SS</span><span>SmartStock<small>{t('TIE-DYE RETAIL OPS')}</small></span></div>
+        <p className="nav-label">{t('WORKSPACE')}</p>
         <nav>
           {navigation.map((item) => (
             <button key={item.id} className={currentPage === item.id ? 'active' : ''} onClick={() => { setCurrentPage(item.id); setSidebarOpen(false); }}>
-              <span className="nav-icon">{item.icon}</span>{item.label}
+              <span className="nav-icon">{item.icon}</span>{t(item.label)}
               {item.id === 'inventory' && data.lowStock.length > 0 && <b>{data.lowStock.length}</b>}
             </button>
           ))}
         </nav>
         <div className="store-card">
           <span className="store-avatar">IT</span>
-          <div><strong>{data.settings?.store_name || 'Indigo Trail Studio'}</strong><small>Global Store · {data.settings?.currency || 'USD'}</small></div>
+          <div><strong>{data.settings?.store_name || 'Indigo Trail Studio'}</strong><small>{t('Global Store')} · {data.settings?.currency || 'USD'}</small></div>
         </div>
       </aside>
-      {sidebarOpen && <button className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} aria-label="Close menu" />}
+      {sidebarOpen && <button className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} aria-label={t('Close menu')} />}
 
       <div className="main-shell">
         <header className="topbar">
-          <button className="menu-button" onClick={() => setSidebarOpen(true)} aria-label="Open menu">☰</button>
-          <div><h1>{pageMeta[currentPage][0]}</h1><p>{pageMeta[currentPage][1]}</p></div>
+          <button className="menu-button" onClick={() => setSidebarOpen(true)} aria-label={t('Open menu')}>☰</button>
+          <div className="topbar-title"><h1>{t(pageMeta[currentPage][0])}</h1><p>{t(pageMeta[currentPage][1])}</p></div>
           <div className="topbar-actions">
-            <button className="export-button" onClick={exportInventory}>↓ Export Inventory</button>
-            <span className="online-badge">● System Online</span>
-            <button className="profile-button" onClick={handleLogout} title="Sign out">
+            <LanguageToggle />
+            <button className="export-button" onClick={exportInventory}>↓ {t('Export Inventory')}</button>
+            <span className="online-badge">● {t('System Online')}</span>
+            <button className="profile-button" onClick={handleLogout} title={t('Sign out')}>
               <span>{user.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span>
-              <div><strong>{user.name}</strong><small>{user.role}</small></div>
+              <div><strong>{user.name}</strong><small>{t(user.role === 'admin' ? 'Admin' : 'Employee')}</small></div>
             </button>
           </div>
         </header>
