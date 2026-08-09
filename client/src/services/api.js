@@ -60,3 +60,10 @@ export const addCustomer = (customer) =>
 export const fetchSettings = () => request('/settings');
 export const updateSettings = (settings) =>
   request('/settings', { method: 'PUT', body: JSON.stringify(settings) });
+
+export const fetchDatabaseTables = () => request('/database/tables');
+export const fetchDatabaseRows = (table, { search = '', page = 1, pageSize = 25 } = {}) => {
+  const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+  if (search) params.set('search', search);
+  return request(`/database/${encodeURIComponent(table)}?${params.toString()}`);
+};
