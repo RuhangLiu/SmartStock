@@ -7,6 +7,7 @@ import OrdersPage from './pages/OrdersPage';
 import CustomersPage from './pages/CustomersPage';
 import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
+import DatabasePage from './pages/DatabasePage';
 import { useI18n } from './i18n';
 import {
   clearToken,
@@ -34,7 +35,8 @@ const navigation = [
   { id: 'orders', label: 'Orders', icon: '▤' },
   { id: 'customers', label: 'Customers', icon: '◎' },
   { id: 'reports', label: 'Reports', icon: '◫' },
-  { id: 'settings', label: 'Settings', icon: '⚙' }
+  { id: 'settings', label: 'Settings', icon: '⚙' },
+  { id: 'database', label: 'Database', icon: '▧', adminOnly: true }
 ];
 
 const pageMeta = {
@@ -45,7 +47,8 @@ const pageMeta = {
   orders: ['Order Management', 'Track purchase and international orders'],
   customers: ['Customer Directory', 'Manage cross-border customer records'],
   reports: ['Business Reports', 'Sales and inventory performance'],
-  settings: ['Store Settings', 'Workspace and account configuration']
+  settings: ['Store Settings', 'Workspace and account configuration'],
+  database: ['Database Viewer', 'Secure read-only access to application data']
 };
 
 function LanguageToggle({ className = '' }) {
@@ -181,6 +184,10 @@ function App() {
     if (user) loadData();
   }, [user, loadData]);
 
+  useEffect(() => {
+    if (user && user.role !== 'admin' && currentPage === 'database') setCurrentPage('dashboard');
+  }, [currentPage, user]);
+
   const handleLogin = async (credentials) => {
     const result = await login(credentials);
     storeToken(result.token);
@@ -197,6 +204,7 @@ function App() {
     try { await logout(); } catch { /* session may already be expired */ }
     clearToken();
     setUser(null);
+    setCurrentPage('dashboard');
     setData({ products: [], lowStock: [], sales: [], orders: [], customers: [], report: null, settings: null });
   };
 
@@ -226,6 +234,7 @@ function App() {
     if (currentPage === 'customers') return <CustomersPage {...common} />;
     if (currentPage === 'reports') return <ReportsPage {...common} />;
     if (currentPage === 'settings') return <SettingsPage {...common} />;
+    if (currentPage === 'database') return <DatabasePage {...common} />;
     return <DashboardPage {...common} onNavigate={setCurrentPage} />;
   }, [currentPage, data, loading, user, loadData, notify]);
 
@@ -239,7 +248,7 @@ function App() {
         <div className="app-brand"><span className="brand-symbol">SS</span><span>SmartStock<small>{t('TIE-DYE RETAIL OPS')}</small></span></div>
         <p className="nav-label">{t('WORKSPACE')}</p>
         <nav>
-          {navigation.map((item) => (
+          {navigation.filter((item) => !item.adminOnly || user.role === 'admin').map((item) => (
             <button key={item.id} className={currentPage === item.id ? 'active' : ''} onClick={() => { setCurrentPage(item.id); setSidebarOpen(false); }}>
               <span className="nav-icon">{item.icon}</span>{t(item.label)}
               {item.id === 'inventory' && data.lowStock.length > 0 && <b>{data.lowStock.length}</b>}

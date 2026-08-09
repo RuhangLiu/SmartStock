@@ -7,6 +7,7 @@ const productRoutes = require('./routes/productRoutes');
 const saleRoutes = require('./routes/saleRoutes');
 const authRoutes = require('./routes/authRoutes');
 const operationsRoutes = require('./routes/operationsRoutes');
+const databaseRoutes = require('./routes/databaseRoutes');
 const { requireAuth } = require('./middleware/auth');
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/products', requireAuth, productRoutes);
 app.use('/api/sales', requireAuth, saleRoutes);
+app.use('/api/database', requireAuth, databaseRoutes);
 app.use('/api', requireAuth, operationsRoutes);
 
 const clientDist = path.join(__dirname, '../../client/dist');
