@@ -261,7 +261,41 @@ async function main() {
       return `200; store=${res.payload.data.store_name}; threshold=${res.payload.data.default_threshold}`;
     });
 
-    await runCase('TC-27', 'POST /api/auth/logout', 'Admin logs out', '200 and session invalidated', async () => {
+    await runCase('TC-27', 'GET /api/database/tables', 'Admin retrieves the read-only database table catalog', '200 and approved table metadata', async () => {
+      const res = await request(baseUrl, 'GET', '/api/database/tables', null, adminToken);
+      assert.equal(res.status, 200);
+      assert.equal(res.payload.data.read_only, true);
+      assert.ok(res.payload.data.tables.some((table) => table.name === 'products'));
+      assert.ok(res.payload.data.tables.some((table) => table.name === 'users'));
+      return `200; ${res.payload.data.tables.length} approved tables returned`;
+    });
+
+    await runCase('TC-28', 'GET /api/database/products', 'Admin searches paginated product rows', '200, matching rows, and pagination metadata', async () => {
+      const res = await request(baseUrl, 'GET', '/api/database/products?search=TEST-SALE-001&page=1&page_size=10', null, adminToken);
+      assert.equal(res.status, 200);
+      assert.equal(res.payload.data.read_only, true);
+      assert.equal(res.payload.data.rows.length, 1);
+      assert.equal(res.payload.data.rows[0].sku, 'TEST-SALE-001');
+      assert.equal(res.payload.data.pagination.page_size, 10);
+      return '200; matching product row returned with pagination';
+    });
+
+    await runCase('TC-29', 'GET /api/database/users', 'Database viewer excludes password hashes', '200 without sensitive password_hash field', async () => {
+      const res = await request(baseUrl, 'GET', '/api/database/users', null, adminToken);
+      assert.equal(res.status, 200);
+      assert.ok(res.payload.data.rows.length >= 2);
+      assert.ok(!res.payload.data.columns.some((column) => column.name === 'password_hash'));
+      assert.ok(res.payload.data.rows.every((row) => !Object.prototype.hasOwnProperty.call(row, 'password_hash')));
+      return '200; user rows returned without password hashes';
+    });
+
+    await runCase('TC-30', 'GET /api/database/tables', 'Employee attempts to open the database viewer', '403 Forbidden', async () => {
+      const res = await request(baseUrl, 'GET', '/api/database/tables', null, employeeToken);
+      assert.equal(res.status, 403);
+      return `403; ${res.payload.message}`;
+    });
+
+    await runCase('TC-31', 'POST /api/auth/logout', 'Admin logs out', '200 and session invalidated', async () => {
       const res = await request(baseUrl, 'POST', '/api/auth/logout', null, adminToken);
       assert.equal(res.status, 200);
       const me = await request(baseUrl, 'GET', '/api/auth/me', null, adminToken);
