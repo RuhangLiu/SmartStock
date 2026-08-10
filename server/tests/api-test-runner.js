@@ -5,6 +5,7 @@ const path = require('node:path');
 
 const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'smartstock-api-test-'));
 process.env.SMARTSTOCK_DB_PATH = path.join(testDir, 'smartstock-test.db');
+process.env.SMARTSTOCK_UPLOAD_DIR = path.join(testDir, 'uploads', 'products');
 
 const app = require('../src/app');
 
@@ -23,6 +24,18 @@ async function request(baseUrl, method, endpoint, body, token) {
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     },
     ...(body ? { body: JSON.stringify(body) } : {})
+  });
+  const payload = await response.json();
+  return { status: response.status, payload };
+}
+
+async function uploadRequest(baseUrl, endpoint, { bytes, name, type }, token) {
+  const body = new FormData();
+  body.append('image', new Blob([bytes], { type }), name);
+  const response = await fetch(`${baseUrl}${endpoint}`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body
   });
   const payload = await response.json();
   return { status: response.status, payload };
@@ -295,7 +308,39 @@ async function main() {
       return `403; ${res.payload.message}`;
     });
 
-    await runCase('TC-31', 'POST /api/auth/logout', 'Admin logs out', '200 and session invalidated', async () => {
+    await runCase('TC-31', 'POST /api/products/image', 'Employee attempts to upload a product image', '403 Forbidden', async () => {
+      const res = await uploadRequest(baseUrl, '/api/products/image', {
+        bytes: Buffer.from('not-read-because-permission-fails'), name: 'employee.png', type: 'image/png'
+      }, employeeToken);
+      assert.equal(res.status, 403);
+      return `403; ${res.payload.message}`;
+    });
+
+    await runCase('TC-32', 'POST /api/products/image', 'Admin uploads an unsupported file type', '400 validation error', async () => {
+      const res = await uploadRequest(baseUrl, '/api/products/image', {
+        bytes: Buffer.from('plain text'), name: 'notes.txt', type: 'text/plain'
+      }, adminToken);
+      assert.equal(res.status, 400);
+      assert.match(res.payload.message, /JPG, PNG, and WebP/);
+      return `400; ${res.payload.message}`;
+    });
+
+    await runCase('TC-33', 'POST /api/products/image', 'Admin uploads a valid local product image', '201, public URL, and persisted file', async () => {
+      const pngBytes = Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex');
+      const res = await uploadRequest(baseUrl, '/api/products/image', {
+        bytes: pngBytes, name: 'catalog-image.png', type: 'image/png'
+      }, adminToken);
+      assert.equal(res.status, 201);
+      assert.match(res.payload.data.image_url, /^\/uploads\/products\/[a-f0-9-]+\.png$/);
+      const uploadedPath = path.join(process.env.SMARTSTOCK_UPLOAD_DIR, res.payload.data.filename);
+      assert.equal(fs.existsSync(uploadedPath), true);
+      const publicImage = await fetch(`${baseUrl}${res.payload.data.image_url}`);
+      assert.equal(publicImage.status, 200);
+      assert.equal(publicImage.headers.get('content-type'), 'image/png');
+      return `201; ${res.payload.data.image_url}; file persisted and publicly readable`;
+    });
+
+    await runCase('TC-34', 'POST /api/auth/logout', 'Admin logs out', '200 and session invalidated', async () => {
       const res = await request(baseUrl, 'POST', '/api/auth/logout', null, adminToken);
       assert.equal(res.status, 200);
       const me = await request(baseUrl, 'GET', '/api/auth/me', null, adminToken);

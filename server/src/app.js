@@ -9,12 +9,18 @@ const authRoutes = require('./routes/authRoutes');
 const operationsRoutes = require('./routes/operationsRoutes');
 const databaseRoutes = require('./routes/databaseRoutes');
 const { requireAuth } = require('./middleware/auth');
+const { uploadDir } = require('./middleware/productImageUpload');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads/products', express.static(uploadDir, {
+  fallthrough: false,
+  immutable: true,
+  maxAge: '30d'
+}));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', requireAuth, productRoutes);
@@ -42,7 +48,8 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).json({ success: false, message: 'Server error' });
+  const status = Number(err.status || err.statusCode) || 500;
+  res.status(status).json({ success: false, message: status < 500 ? err.message : 'Server error' });
 });
 
 module.exports = app;
