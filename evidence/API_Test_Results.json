@@ -1,14 +1,14 @@
 {
   "project": "SmartStock Inventory and Sales Management System",
-  "executed_at": "2026-07-25T22:40:49.390Z",
+  "executed_at": "2026-08-10T22:15:24.737Z",
   "environment": {
     "runtime": "v24.18.0",
     "database": "Isolated temporary SQLite database",
     "transport": "HTTP on an ephemeral local port"
   },
   "summary": {
-    "total": 27,
-    "passed": 27,
+    "total": 34,
+    "passed": 34,
     "failed": 0,
     "pass_rate": "100.0%"
   },
@@ -20,7 +20,7 @@
       "expected": "200 and authentication token",
       "actual": "200; role=admin; token returned",
       "status": "Pass",
-      "duration_ms": 37
+      "duration_ms": 38
     },
     {
       "id": "TC-02",
@@ -29,7 +29,7 @@
       "expected": "200 and employee role",
       "actual": "200; employee session created",
       "status": "Pass",
-      "duration_ms": 19
+      "duration_ms": 20
     },
     {
       "id": "TC-03",
@@ -38,7 +38,7 @@
       "expected": "401 Unauthorized",
       "actual": "401; Incorrect email or password",
       "status": "Pass",
-      "duration_ms": 20
+      "duration_ms": 21
     },
     {
       "id": "TC-04",
@@ -128,7 +128,7 @@
       "expected": "400 Insufficient stock",
       "actual": "400; Insufficient stock",
       "status": "Pass",
-      "duration_ms": 2
+      "duration_ms": 1
     },
     {
       "id": "TC-14",
@@ -137,7 +137,7 @@
       "expected": "200 and recorded sale",
       "actual": "200; 1 sale returned",
       "status": "Pass",
-      "duration_ms": 1
+      "duration_ms": 2
     },
     {
       "id": "TC-15",
@@ -146,7 +146,7 @@
       "expected": "200 with revenue and inventory metrics",
       "actual": "200; revenue=60; units=2",
       "status": "Pass",
-      "duration_ms": 2
+      "duration_ms": 0
     },
     {
       "id": "TC-16",
@@ -182,7 +182,7 @@
       "expected": "200 and saved currency",
       "actual": "200; default threshold=6; currency=USD",
       "status": "Pass",
-      "duration_ms": 2
+      "duration_ms": 1
     },
     {
       "id": "TC-20",
@@ -191,7 +191,7 @@
       "expected": "201 and employee user",
       "actual": "201; user id=3; role=employee",
       "status": "Pass",
-      "duration_ms": 20
+      "duration_ms": 21
     },
     {
       "id": "TC-21",
@@ -209,7 +209,7 @@
       "expected": "200 and deleted id",
       "actual": "200; deleted product id=10",
       "status": "Pass",
-      "duration_ms": 3
+      "duration_ms": 4
     },
     {
       "id": "TC-23",
@@ -218,7 +218,7 @@
       "expected": "200 and current admin user",
       "actual": "200; user=admin@smartstock.com; role=admin",
       "status": "Pass",
-      "duration_ms": 2
+      "duration_ms": 1
     },
     {
       "id": "TC-24",
@@ -236,7 +236,7 @@
       "expected": "200 and created customer included",
       "actual": "200; 4 customers returned; created customer found",
       "status": "Pass",
-      "duration_ms": 1
+      "duration_ms": 2
     },
     {
       "id": "TC-26",
@@ -245,16 +245,79 @@
       "expected": "200 and updated settings returned",
       "actual": "200; store=Indigo Trail Studio; threshold=6",
       "status": "Pass",
-      "duration_ms": 2
+      "duration_ms": 1
     },
     {
       "id": "TC-27",
+      "api": "GET /api/database/tables",
+      "scenario": "Admin retrieves the read-only database table catalog",
+      "expected": "200 and approved table metadata",
+      "actual": "200; 7 approved tables returned",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-28",
+      "api": "GET /api/database/products",
+      "scenario": "Admin searches paginated product rows",
+      "expected": "200, matching rows, and pagination metadata",
+      "actual": "200; matching product row returned with pagination",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-29",
+      "api": "GET /api/database/users",
+      "scenario": "Database viewer excludes password hashes",
+      "expected": "200 without sensitive password_hash field",
+      "actual": "200; user rows returned without password hashes",
+      "status": "Pass",
+      "duration_ms": 1
+    },
+    {
+      "id": "TC-30",
+      "api": "GET /api/database/tables",
+      "scenario": "Employee attempts to open the database viewer",
+      "expected": "403 Forbidden",
+      "actual": "403; You do not have permission to perform this action",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-31",
+      "api": "POST /api/products/image",
+      "scenario": "Employee attempts to upload a product image",
+      "expected": "403 Forbidden",
+      "actual": "403; You do not have permission to perform this action",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-32",
+      "api": "POST /api/products/image",
+      "scenario": "Admin uploads an unsupported file type",
+      "expected": "400 validation error",
+      "actual": "400; Only JPG, PNG, and WebP images are allowed",
+      "status": "Pass",
+      "duration_ms": 3
+    },
+    {
+      "id": "TC-33",
+      "api": "POST /api/products/image",
+      "scenario": "Admin uploads a valid local product image",
+      "expected": "201, public URL, and persisted file",
+      "actual": "201; /uploads/products/a2a2f840-580a-4d36-930c-13f922e8f52d.png; file persisted and publicly readable",
+      "status": "Pass",
+      "duration_ms": 5
+    },
+    {
+      "id": "TC-34",
       "api": "POST /api/auth/logout",
       "scenario": "Admin logs out",
       "expected": "200 and session invalidated",
       "actual": "200 logout; former session returns 401",
       "status": "Pass",
-      "duration_ms": 4
+      "duration_ms": 3
     }
   ]
 }
