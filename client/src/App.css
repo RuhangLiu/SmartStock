@@ -183,6 +183,11 @@ td > strong { color: var(--text); }.sku { color: var(--navy-2); font-size: 8px; 
 .product-image-preview { margin: 0 0 17px; padding: 10px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 9px; background: #f3f5f3; }
 .product-image-preview img { width: 74px; height: 58px; object-fit: cover; border-radius: 7px; }
 .product-image-preview strong, .product-image-preview small { display: block; }.product-image-preview strong { color: var(--navy); font-size: 9px; }.product-image-preview small { margin-top: 3px; color: var(--muted); font-size: 8px; }
+.image-upload-field { min-height: 74px; margin: -2px 0 17px; padding: 11px 12px; display: flex; align-items: center; justify-content: space-between; gap: 14px; border: 1px dashed #b8c8d0; border-radius: 9px; background: #f7f9f8; }
+.image-upload-field strong, .image-upload-field small { display: block; }.image-upload-field strong { color: var(--navy); font-size: 13px; }.image-upload-field small { margin-top: 4px; color: var(--muted); font-size: 11px; }
+.image-file-button { min-width: 132px; margin: 0; display: inline-flex !important; align-items: center; justify-content: center; cursor: pointer; white-space: nowrap; }
+.image-file-button input { width: 1px; height: 1px; position: absolute; overflow: hidden; opacity: 0; pointer-events: none; }
+.image-file-button.disabled { opacity: .6; cursor: wait; }
 .stack-form > label small { color: var(--muted); font-size: 8px; font-weight: 500; }
 
 /* Inventory */
@@ -343,6 +348,7 @@ td { padding: 13px 14px; font-size: 13px; }
   .inventory-summary, .customer-grid, .reorder-grid, .category-report-grid { grid-template-columns: 1fr; }
   .product-card-grid { grid-template-columns: 1fr; padding: 0 14px 14px; }
   .form-grid { grid-template-columns: 1fr; }.responsive-heading { display: block; }.responsive-heading .filter-tabs { margin-top: 10px; }
+  .image-upload-field { align-items: stretch; flex-direction: column; }.image-file-button { width: 100%; }
   .bar-row { grid-template-columns: 78px 1fr 36px; }.compact-row { grid-template-columns: 1fr 48px 62px; }
   .report-hero { grid-template-columns: 1fr; }.report-hero > div { padding: 10px 0 0; border-left: 0; border-top: 1px solid rgba(255,255,255,.17); }
   .login-brand-panel { height: 350px; min-height: 350px; }.login-brand-panel h1 { font-size: 38px; }.login-form-panel { padding-top: 82px; }.auth-language-toggle { top: 20px; right: 22px; }

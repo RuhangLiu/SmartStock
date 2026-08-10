@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { addProduct, deleteProduct, editProduct } from '../services/api';
+import { addProduct, deleteProduct, editProduct, uploadProductImage } from '../services/api';
 import { money, stockStatus } from '../utils';
 import { useI18n } from '../i18n';
 
@@ -15,6 +15,7 @@ function ProductsPage({ products, user, onRefresh, notify }) {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   const filtered = useMemo(() => {
     const term = search.toLowerCase();
@@ -47,6 +48,31 @@ function ProductsPage({ products, user, onRefresh, notify }) {
     if (!window.confirm(t('Delete {name}?', { name: product.name }))) return;
     try { await deleteProduct(product.id); await onRefresh(); notify(t('Product deleted')); }
     catch (err) { notify(t(err.message)); }
+  };
+
+  const chooseImage = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setError(t('Only JPG, PNG, and WebP images are allowed'));
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError(t('Image must be 5MB or smaller'));
+      return;
+    }
+    setError('');
+    setUploading(true);
+    try {
+      const uploaded = await uploadProductImage(file);
+      setForm((current) => ({ ...current, image_url: uploaded.image_url }));
+      notify(t('Image uploaded'));
+    } catch (err) {
+      setError(t(err.message));
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -100,6 +126,13 @@ function ProductsPage({ products, user, onRefresh, notify }) {
             <label>{t('Quantity')}<input type="number" min="0" value={form.quantity} onChange={(event) => setForm({ ...form, quantity: event.target.value })} required /></label>
             <label>{t('Low-Stock Threshold')}<input type="number" min="0" value={form.low_stock_threshold} onChange={(event) => setForm({ ...form, low_stock_threshold: event.target.value })} required /></label>
             <label className="wide-field">{t('Product Image URL')}<input value={form.image_url || ''} onChange={(event) => setForm({ ...form, image_url: event.target.value })} placeholder="/assets/products/cloud-scarf.jpg or https://…" /></label>
+            <div className="image-upload-field wide-field">
+              <div><strong>{t('Upload from your device')}</strong><small>{t('JPG, PNG, or WebP · Maximum 5MB')}</small></div>
+              <label className={`secondary-button image-file-button ${uploading ? 'disabled' : ''}`}>
+                {t(uploading ? 'Uploading…' : 'Choose Image')}
+                <input type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseImage} disabled={uploading} />
+              </label>
+            </div>
           </div>
           {form.image_url && <div className="product-image-preview"><img src={form.image_url} alt={t('Product preview')} /><div><strong>{t('Image preview')}</strong><small>{t('Use a square product image for the best result.')}</small></div></div>}
           {error && <div className="message error">{error}</div>}

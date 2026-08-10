@@ -10,3 +10,4 @@ server/database/*.db-wal
 coverage/
 .vite/
 server/tests/api-test-results.json
+server/uploads/
