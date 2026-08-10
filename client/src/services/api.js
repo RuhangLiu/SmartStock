@@ -7,10 +7,11 @@ export const clearToken = () => localStorage.removeItem(TOKEN_KEY);
 
 async function request(path, options = {}) {
   const token = getStoredToken();
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
   const response = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers: {
-      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(options.body && !isFormData ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers
     }
@@ -41,6 +42,11 @@ export const addProduct = (product) =>
 export const editProduct = (id, product) =>
   request(`/products/${id}`, { method: 'PUT', body: JSON.stringify(product) });
 export const deleteProduct = (id) => request(`/products/${id}`, { method: 'DELETE' });
+export const uploadProductImage = (file) => {
+  const body = new FormData();
+  body.append('image', file);
+  return request('/products/image', { method: 'POST', body });
+};
 
 export const fetchSales = () => request('/sales');
 export const createSale = (sale) =>

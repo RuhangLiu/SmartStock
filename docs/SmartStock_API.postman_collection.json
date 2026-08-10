@@ -181,6 +181,55 @@
           },
           "response": [],
           "event": []
+        },
+        {
+          "name": "POST Sign up",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "signup"
+              ]
+            },
+            "description": "Creates a new employee account through the public registration page. Passwords must contain at least eight characters. Access: Public.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Employee\",\n  \"email\": \"new.employee@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Sign up succeeds', function () { pm.response.to.have.status(201); });",
+                  "pm.test('New account is an employee', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data.role).to.eql('employee');",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -311,6 +360,61 @@
           },
           "response": [],
           "event": []
+        },
+        {
+          "name": "POST Upload product image",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "image"
+              ]
+            },
+            "description": "Uploads one JPG, PNG, or WebP product image up to 5MB and returns its public URL. Access: Admin.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Image upload succeeds', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Response includes an image URL', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data.image_url).to.match(/^\\/uploads\\/products\\//);",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "PUT Update product",
@@ -811,12 +915,132 @@
           "event": []
         }
       ]
+    },
+    {
+      "name": "Database",
+      "item": [
+        {
+          "name": "GET List database tables",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/database/tables",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "database",
+                "tables"
+              ]
+            },
+            "description": "Returns the administrator-only catalog of database tables and their safe, read-only columns. Access: Admin.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Database table catalog is returned', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Database viewer is read-only', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data.read_only).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET View table rows",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/database/products?page=1&pageSize=25&search=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "database",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "25"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Returns a searchable, paginated, read-only view of an approved database table. Access: Admin.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Database rows are returned', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response is paginated', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data.pagination).to.be.an('object');",
+                  "  pm.expect(body.data.rows).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:4000"
+      "value": "https://dyedwild-smartstock.azurewebsites.net"
     },
     {
       "key": "adminToken",

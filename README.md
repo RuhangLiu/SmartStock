@@ -4,16 +4,18 @@ SmartStock is an English-language capstone application for managing the products
 
 ## Capstone deliverables
 
-- 20 REST API endpoints: the 19 finalized capstone endpoints plus public employee signup
+- 23 REST API endpoints, including public signup, local product-image upload, and the read-only database viewer
 - Expected input, output, sample JSON, access rules, and error behavior
 - SQLite database design with 7 tables and an entity relationship diagram
 - Bearer-token authentication with administrator and employee roles
 - Automated HTTP integration tests
-- 27 of 27 tests passed
+- 34 of 34 tests passed
 - Postman collection for manual API demonstration
 - English sign-in and employee registration interface
 - Image-enabled product catalog with eight original tie-dye product photographs
 - Responsive, readability-focused typography for desktop and mobile
+- Administrator-only JPG, PNG, and WebP product-image upload with Azure persistent storage
+- Administrator-only read-only database viewer with search and pagination
 
 ## Technology
 
@@ -71,6 +73,7 @@ Use these App Service application settings:
 ```text
 NODE_ENV=production
 SMARTSTOCK_DB_PATH=/home/data/smartstock.db
+SMARTSTOCK_UPLOAD_DIR=/home/data/uploads/products
 WEBSITES_ENABLE_APP_SERVICE_STORAGE=true
 SCM_DO_BUILD_DURING_DEPLOYMENT=true
 ```
@@ -87,7 +90,7 @@ npm test
 Expected result:
 
 ```text
-SmartStock API tests: 27/27 passed
+SmartStock API tests: 34/34 passed
 ```
 
 The test runner uses an isolated temporary SQLite database and an ephemeral local HTTP port. It does not modify the demonstration database.
@@ -97,11 +100,12 @@ The test runner uses an isolated temporary SQLite database and an ephemeral loca
 | Group | Count | Capabilities |
 |---|---:|---|
 | Authentication | 5 | Public signup, login, current user, logout, administrator-managed staff registration |
-| Products | 5 | Catalog, search, low stock, create, update, delete |
+| Products | 6 | Catalog, search, low stock, local image upload, create, update, delete |
 | Sales | 3 | Sales history, record sale, aggregated report |
 | Orders | 3 | List, create, update status |
 | Customers | 2 | List and create |
 | Settings | 2 | Read and update |
+| Database | 2 | List approved tables and view searched, paginated rows |
 
 All protected business endpoints require a bearer token. Administrative mutations are protected by role middleware. Public signup creates an employee account and immediately returns an authenticated session.
 
@@ -110,7 +114,8 @@ All protected business endpoints require a bearer token. Administrative mutation
 - Passwords use salted scrypt hashes.
 - Sessions expire after seven days.
 - Product SKU values are unique.
-- Products can store an image URL used by the frontend catalog and editor preview.
+- Products can use an external image URL or an uploaded JPG, PNG, or WebP file up to 5MB.
+- Uploaded product images are stored under `/home/data/uploads/products` on Azure App Service.
 - The initial catalog contains eight curated tie-dye products; runtime demonstration data is not committed.
 - Sale totals are calculated using the product price stored in SQLite.
 - Recording a sale and reducing inventory occur in one transaction.
@@ -131,8 +136,8 @@ All protected business endpoints require a bearer token. Administrative mutation
 The finalized submission was executed against the exact backend source included in this repository:
 
 ```text
-27 tests executed
-27 tests passed
+34 tests executed
+34 tests passed
 0 tests failed
 100% pass rate
 ```
