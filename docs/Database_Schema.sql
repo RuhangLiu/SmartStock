@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS products (
   cost REAL NOT NULL DEFAULT 0,
   quantity INTEGER NOT NULL DEFAULT 0,
   low_stock_threshold INTEGER NOT NULL DEFAULT 5,
+  image_url TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -76,3 +77,28 @@ CREATE TABLE IF NOT EXISTS settings (
   admin_name TEXT NOT NULL DEFAULT 'Alicia Chen',
   currency TEXT NOT NULL DEFAULT 'USD'
 );
+
+CREATE TABLE IF NOT EXISTS inventory_movements (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER,
+  product_sku TEXT NOT NULL,
+  product_name TEXT NOT NULL,
+  movement_type TEXT NOT NULL CHECK(movement_type IN ('INITIAL', 'SALE', 'ADJUSTMENT', 'RETURN', 'PURCHASE')),
+  quantity_change INTEGER NOT NULL,
+  quantity_before INTEGER NOT NULL,
+  quantity_after INTEGER NOT NULL,
+  reason TEXT NOT NULL,
+  reference_type TEXT,
+  reference_id INTEGER,
+  created_by INTEGER,
+  created_by_name TEXT NOT NULL DEFAULT 'System',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_inventory_movements_product
+  ON inventory_movements(product_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_inventory_movements_type
+  ON inventory_movements(movement_type, created_at DESC);

@@ -8,6 +8,7 @@ const saleRoutes = require('./routes/saleRoutes');
 const authRoutes = require('./routes/authRoutes');
 const operationsRoutes = require('./routes/operationsRoutes');
 const databaseRoutes = require('./routes/databaseRoutes');
+const inventoryRoutes = require('./routes/inventoryRoutes');
 const { requireAuth } = require('./middleware/auth');
 const { uploadDir } = require('./middleware/productImageUpload');
 
@@ -26,6 +27,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', requireAuth, productRoutes);
 app.use('/api/sales', requireAuth, saleRoutes);
 app.use('/api/database', requireAuth, databaseRoutes);
+app.use('/api/inventory', requireAuth, inventoryRoutes);
 app.use('/api', requireAuth, operationsRoutes);
 
 const clientDist = path.join(__dirname, '../../client/dist');

@@ -1,4 +1,5 @@
 const { db } = require('../models/db');
+const { recordInventoryMovement } = require('../models/inventoryMovement');
 
 const productFields = `
   id, sku, name, origin, material, dye_technique, category, price, cost,
@@ -53,6 +54,7 @@ exports.addProduct = (req, res) => {
   const validationError = validateProduct(product);
   if (validationError) return res.status(400).json({ success: false, message: validationError });
 
+  db.exec('BEGIN');
   try {
     const info = db.prepare(`
       INSERT INTO products
@@ -64,8 +66,21 @@ exports.addProduct = (req, res) => {
       product.image_url
     );
     const created = db.prepare(`SELECT ${productFields} FROM products WHERE id = ?`).get(info.lastInsertRowid);
+    recordInventoryMovement({
+      product: created,
+      movementType: 'INITIAL',
+      quantityChange: created.quantity,
+      quantityBefore: 0,
+      quantityAfter: created.quantity,
+      reason: 'Initial stock entered when product was created',
+      referenceType: 'PRODUCT_CREATE',
+      referenceId: created.id,
+      user: req.user
+    });
+    db.exec('COMMIT');
     res.status(201).json({ success: true, data: created });
   } catch (error) {
+    db.exec('ROLLBACK');
     const message = error.message.includes('UNIQUE') ? 'SKU already exists' : error.message;
     res.status(400).json({ success: false, message });
   }
@@ -76,7 +91,10 @@ exports.editProduct = (req, res) => {
   const validationError = validateProduct(product);
   if (validationError) return res.status(400).json({ success: false, message: validationError });
 
+  db.exec('BEGIN');
   try {
+    const existing = db.prepare(`SELECT ${productFields} FROM products WHERE id = ?`).get(Number(req.params.id));
+    if (!existing) throw new Error('Product not found');
     const info = db.prepare(`
       UPDATE products SET
         sku = ?, name = ?, origin = ?, material = ?, dye_technique = ?, category = ?,
@@ -88,10 +106,28 @@ exports.editProduct = (req, res) => {
       product.image_url,
       Number(req.params.id)
     );
-    if (Number(info.changes) === 0) return res.status(404).json({ success: false, message: 'Product not found' });
     const updated = db.prepare(`SELECT ${productFields} FROM products WHERE id = ?`).get(Number(req.params.id));
+    const quantityChange = Number(updated.quantity) - Number(existing.quantity);
+    if (quantityChange !== 0) {
+      recordInventoryMovement({
+        product: updated,
+        movementType: 'ADJUSTMENT',
+        quantityChange,
+        quantityBefore: Number(existing.quantity),
+        quantityAfter: Number(updated.quantity),
+        reason: String(req.body.inventory_reason || 'Inventory changed during product edit').trim(),
+        referenceType: 'PRODUCT_EDIT',
+        referenceId: updated.id,
+        user: req.user
+      });
+    }
+    db.exec('COMMIT');
     res.json({ success: true, data: updated });
   } catch (error) {
+    db.exec('ROLLBACK');
+    if (error.message === 'Product not found') {
+      return res.status(404).json({ success: false, message: error.message });
+    }
     const message = error.message.includes('UNIQUE') ? 'SKU already exists' : error.message;
     res.status(400).json({ success: false, message });
   }

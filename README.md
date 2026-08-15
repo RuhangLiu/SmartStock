@@ -4,18 +4,20 @@ SmartStock is an English-language capstone application for managing the products
 
 ## Capstone deliverables
 
-- 23 REST API endpoints, including public signup, local product-image upload, and the read-only database viewer
+- 25 REST API endpoints, including public signup, local product-image upload, inventory movement history, and the read-only database viewer
 - Expected input, output, sample JSON, access rules, and error behavior
-- SQLite database design with 7 tables and an entity relationship diagram
+- SQLite database design with 8 tables and an entity relationship diagram
 - Bearer-token authentication with administrator and employee roles
 - Automated HTTP integration tests
-- 34 of 34 tests passed
+- 41 of 41 tests passed
 - Postman collection for manual API demonstration
 - English sign-in and employee registration interface
 - Image-enabled product catalog with eight original tie-dye product photographs
 - Responsive, readability-focused typography for desktop and mobile
 - Administrator-only JPG, PNG, and WebP product-image upload with Azure persistent storage
 - Administrator-only read-only database viewer with search and pagination
+- Complete inventory movement history with before/after balances, operator, reason, filters, and pagination
+- Administrator-only manual inventory adjustments with employee read-only access and negative-stock protection
 
 ## Technology
 
@@ -90,7 +92,7 @@ npm test
 Expected result:
 
 ```text
-SmartStock API tests: 34/34 passed
+SmartStock API tests: 41/41 passed
 ```
 
 The test runner uses an isolated temporary SQLite database and an ephemeral local HTTP port. It does not modify the demonstration database.
@@ -105,6 +107,7 @@ The test runner uses an isolated temporary SQLite database and an ephemeral loca
 | Orders | 3 | List, create, update status |
 | Customers | 2 | List and create |
 | Settings | 2 | Read and update |
+| Inventory | 2 | Read movement history and perform administrator-only documented stock adjustments |
 | Database | 2 | List approved tables and view searched, paginated rows |
 
 All protected business endpoints require a bearer token. Administrative mutations are protected by role middleware. Public signup creates an employee account and immediately returns an authenticated session.
@@ -119,6 +122,9 @@ All protected business endpoints require a bearer token. Administrative mutation
 - The initial catalog contains eight curated tie-dye products; runtime demonstration data is not committed.
 - Sale totals are calculated using the product price stored in SQLite.
 - Recording a sale and reducing inventory occur in one transaction.
+- Product creation, quantity edits, sales, and manual adjustments automatically create immutable inventory movement records.
+- Every movement stores its signed change, before/after balance, operator, reason, timestamp, and source reference.
+- Inventory changes and their corresponding movement records are committed in the same transaction.
 - A product with sales history cannot be deleted.
 
 ## Documentation
@@ -136,8 +142,8 @@ All protected business endpoints require a bearer token. Administrative mutation
 The finalized submission was executed against the exact backend source included in this repository:
 
 ```text
-34 tests executed
-34 tests passed
+41 tests executed
+41 tests passed
 0 tests failed
 100% pass rate
 ```
