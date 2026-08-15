@@ -48,6 +48,20 @@ export const uploadProductImage = (file) => {
   return request('/products/image', { method: 'POST', body });
 };
 
+export const fetchInventoryMovements = ({
+  productId = '', type = '', search = '', startDate = '', endDate = '', page = 1, pageSize = 20
+} = {}) => {
+  const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+  if (productId) params.set('product_id', productId);
+  if (type) params.set('type', type);
+  if (search) params.set('search', search);
+  if (startDate) params.set('start_date', startDate);
+  if (endDate) params.set('end_date', endDate);
+  return request(`/inventory/movements?${params.toString()}`);
+};
+export const adjustInventory = (adjustment) =>
+  request('/inventory/adjustments', { method: 'POST', body: JSON.stringify(adjustment) });
+
 export const fetchSales = () => request('/sales');
 export const createSale = (sale) =>
   request('/sales', { method: 'POST', body: JSON.stringify(sale) });

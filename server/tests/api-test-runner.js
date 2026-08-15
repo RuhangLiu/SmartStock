@@ -340,7 +340,71 @@ async function main() {
       return `201; ${res.payload.data.image_url}; file persisted and publicly readable`;
     });
 
-    await runCase('TC-34', 'POST /api/auth/logout', 'Admin logs out', '200 and session invalidated', async () => {
+    await runCase('TC-34', 'GET /api/inventory/movements', 'Admin reviews the complete movement history for a product', '200 with initial, edit, and sale movements', async () => {
+      const res = await request(baseUrl, 'GET', `/api/inventory/movements?product_id=${saleProductId}`, null, adminToken);
+      assert.equal(res.status, 200);
+      assert.ok(res.payload.data.rows.some((movement) => movement.movement_type === 'INITIAL' && Number(movement.quantity_after) === 10));
+      assert.ok(res.payload.data.rows.some((movement) => movement.movement_type === 'ADJUSTMENT' && Number(movement.quantity_before) === 10 && Number(movement.quantity_after) === 12));
+      assert.ok(res.payload.data.rows.some((movement) => movement.movement_type === 'SALE' && Number(movement.quantity_before) === 12 && Number(movement.quantity_after) === 10));
+      return `200; ${res.payload.data.rows.length} movements include INITIAL, ADJUSTMENT, and SALE`;
+    });
+
+    await runCase('TC-35', 'GET /api/inventory/movements', 'Employee opens the read-only movement history', '200 with movement rows', async () => {
+      const res = await request(baseUrl, 'GET', `/api/inventory/movements?product_id=${saleProductId}`, null, employeeToken);
+      assert.equal(res.status, 200);
+      assert.ok(res.payload.data.rows.length >= 3);
+      return `200; employee can read ${res.payload.data.rows.length} movements`;
+    });
+
+    await runCase('TC-36', 'POST /api/inventory/adjustments', 'Employee attempts a manual stock adjustment', '403 Forbidden', async () => {
+      const res = await request(baseUrl, 'POST', '/api/inventory/adjustments', {
+        product_id: saleProductId, quantity_change: 5, reason: 'Unauthorized adjustment attempt'
+      }, employeeToken);
+      assert.equal(res.status, 403);
+      return `403; ${res.payload.message}`;
+    });
+
+    await runCase('TC-37', 'POST /api/inventory/adjustments', 'Admin adds stock with a documented reason', '201, movement created, and stock increased', async () => {
+      const res = await request(baseUrl, 'POST', '/api/inventory/adjustments', {
+        product_id: saleProductId, quantity_change: 5, reason: 'Cycle count delivery received'
+      }, adminToken);
+      assert.equal(res.status, 201);
+      assert.equal(Number(res.payload.data.product.quantity), 15);
+      assert.equal(Number(res.payload.data.movement.quantity_before), 10);
+      assert.equal(Number(res.payload.data.movement.quantity_after), 15);
+      return '201; stock 10 → 15; positive adjustment recorded';
+    });
+
+    await runCase('TC-38', 'POST /api/inventory/adjustments', 'Admin removes stock with a documented reason', '201, movement created, and stock reduced', async () => {
+      const res = await request(baseUrl, 'POST', '/api/inventory/adjustments', {
+        product_id: saleProductId, quantity_change: -2, reason: 'Cycle count damaged units'
+      }, adminToken);
+      assert.equal(res.status, 201);
+      assert.equal(Number(res.payload.data.product.quantity), 13);
+      assert.equal(Number(res.payload.data.movement.quantity_change), -2);
+      return '201; stock 15 → 13; negative adjustment recorded';
+    });
+
+    await runCase('TC-39', 'POST /api/inventory/adjustments', 'Admin attempts to reduce inventory below zero', '400 and stock remains unchanged', async () => {
+      const res = await request(baseUrl, 'POST', '/api/inventory/adjustments', {
+        product_id: saleProductId, quantity_change: -999, reason: 'Invalid negative balance test'
+      }, adminToken);
+      assert.equal(res.status, 400);
+      const productRes = await request(baseUrl, 'GET', '/api/products?search=TEST-SALE-001', null, adminToken);
+      assert.equal(Number(productRes.payload.data[0].quantity), 13);
+      return `400; ${res.payload.message}; stock remains 13`;
+    });
+
+    await runCase('TC-40', 'GET /api/inventory/movements', 'Filter and paginate movement history by type and reason', '200 with matching adjustment rows and pagination', async () => {
+      const res = await request(baseUrl, 'GET', '/api/inventory/movements?type=ADJUSTMENT&search=Cycle%20count&page=1&page_size=10', null, adminToken);
+      assert.equal(res.status, 200);
+      assert.equal(res.payload.data.pagination.page_size, 10);
+      assert.ok(res.payload.data.rows.length >= 2);
+      assert.ok(res.payload.data.rows.every((movement) => movement.movement_type === 'ADJUSTMENT' && movement.reason.includes('Cycle count')));
+      return `200; ${res.payload.data.rows.length} filtered adjustment rows returned`;
+    });
+
+    await runCase('TC-41', 'POST /api/auth/logout', 'Admin logs out', '200 and session invalidated', async () => {
       const res = await request(baseUrl, 'POST', '/api/auth/logout', null, adminToken);
       assert.equal(res.status, 200);
       const me = await request(baseUrl, 'GET', '/api/auth/me', null, adminToken);

@@ -6,17 +6,19 @@ Target duration: 6–10 minutes.
 
 1. Introduce SmartStock and its React, Express, and SQLite architecture.
 2. Show the route, controller, middleware, and database modules.
-3. Show all seven SQLite tables and the entity relationship diagram.
+3. Show all eight SQLite tables and the entity relationship diagram.
 4. Log in and show the new row in the `sessions` table.
 5. Create a product with `POST /api/products`, then query `products`.
 6. Update it with `PUT /api/products/:id`, then query the same row again.
 7. Record a sale with `POST /api/sales`, then show:
    - the new row in `sales`;
-   - the reduced `products.quantity`.
+   - the reduced `products.quantity`;
+   - the matching `inventory_movements` row with its before/after balance.
 8. Create and update an order, showing the corresponding `orders` row after each mutation.
 9. Delete a product without sales history and show that its row no longer exists.
-10. Run `npm test` and show `27/27 passed`.
-11. Discuss implementation issues and resolutions.
+10. Create a documented manual inventory adjustment, then show the updated product balance and movement row.
+11. Run `npm test` and show `41/41 passed`.
+12. Discuss implementation issues and resolutions.
 
 ## Database evidence requirement
 
@@ -35,6 +37,12 @@ SELECT id, product_id, quantity_sold, total_price, sale_date
 FROM sales
 ORDER BY id DESC
 LIMIT 5;
+
+SELECT product_sku, movement_type, quantity_change, quantity_before,
+  quantity_after, reason, created_by_name, created_at
+FROM inventory_movements
+ORDER BY id DESC
+LIMIT 10;
 
 SELECT id, supplier, product_name, quantity, status
 FROM orders

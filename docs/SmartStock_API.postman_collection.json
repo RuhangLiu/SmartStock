@@ -917,6 +917,139 @@
       ]
     },
     {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "GET Inventory movement history",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/movements?page=1&page_size=20&type=&search=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "movements"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                },
+                {
+                  "key": "type",
+                  "value": ""
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Returns searchable, filterable, paginated inventory movement history with signed change, before/after balances, operator, reason, timestamp, and source reference. Access: Admin and Employee (read only).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Movement history is returned', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Pagination metadata is present', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data.pagination).to.have.property('total');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Adjust inventory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/adjustments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "adjustments"
+              ]
+            },
+            "description": "Creates a documented signed inventory adjustment and its movement record in one transaction. Use a positive quantity_change to add stock and a negative value to remove stock. Access: Admin.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": 1,\n  \"quantity_change\": 5,\n  \"reason\": \"New shipment received\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Inventory adjustment is created', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Movement contains before and after balances', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data.movement).to.have.property('quantity_before');",
+                  "  pm.expect(body.data.movement).to.have.property('quantity_after');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Database",
       "item": [
         {
