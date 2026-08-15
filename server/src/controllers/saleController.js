@@ -1,4 +1,5 @@
 const { db } = require('../models/db');
+const { recordInventoryMovement } = require('../models/inventoryMovement');
 
 exports.getSales = (req, res) => {
   const sales = db.prepare(`
@@ -40,6 +41,17 @@ exports.recordSale = (req, res) => {
       SET quantity = quantity - ?, updated_at = datetime('now')
       WHERE id = ?
     `).run(quantitySold, productId);
+    recordInventoryMovement({
+      product,
+      movementType: 'SALE',
+      quantityChange: -quantitySold,
+      quantityBefore: Number(product.quantity),
+      quantityAfter: Number(product.quantity) - quantitySold,
+      reason: `Sale through ${salesChannel} to ${destinationRegion}`,
+      referenceType: 'SALE',
+      referenceId: Number(info.lastInsertRowid),
+      user: req.user
+    });
     db.exec('COMMIT');
 
     const sale = db.prepare(`

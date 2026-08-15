@@ -85,6 +85,25 @@ CREATE TABLE IF NOT EXISTS settings (
   admin_name TEXT NOT NULL DEFAULT 'Alicia Chen',
   currency TEXT NOT NULL DEFAULT 'USD'
 );
+
+CREATE TABLE IF NOT EXISTS inventory_movements (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER,
+  product_sku TEXT NOT NULL,
+  product_name TEXT NOT NULL,
+  movement_type TEXT NOT NULL CHECK(movement_type IN ('INITIAL', 'SALE', 'ADJUSTMENT', 'RETURN', 'PURCHASE')),
+  quantity_change INTEGER NOT NULL,
+  quantity_before INTEGER NOT NULL,
+  quantity_after INTEGER NOT NULL,
+  reason TEXT NOT NULL,
+  reference_type TEXT,
+  reference_id INTEGER,
+  created_by INTEGER,
+  created_by_name TEXT NOT NULL DEFAULT 'System',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+);
 `);
 
 function addColumnIfMissing(table, column, definition) {
@@ -104,6 +123,8 @@ addColumnIfMissing('sales', 'destination_region', "TEXT DEFAULT 'United States'"
 addColumnIfMissing('sales', 'sales_channel', "TEXT DEFAULT 'Online Store'");
 
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_products_sku ON products(sku) WHERE sku IS NOT NULL;');
+db.exec('CREATE INDEX IF NOT EXISTS idx_inventory_movements_product ON inventory_movements(product_id, created_at DESC);');
+db.exec('CREATE INDEX IF NOT EXISTS idx_inventory_movements_type ON inventory_movements(movement_type, created_at DESC);');
 
 function hashPassword(password) {
   const salt = randomBytes(16).toString('hex');
@@ -193,5 +214,18 @@ const setProductImage = db.prepare(`
   WHERE sku = ? AND (image_url IS NULL OR image_url = '')
 `);
 productImages.forEach(([sku, imageUrl]) => setProductImage.run(imageUrl, sku));
+
+db.prepare(`
+  INSERT INTO inventory_movements (
+    product_id, product_sku, product_name, movement_type, quantity_change,
+    quantity_before, quantity_after, reason, created_by_name
+  )
+  SELECT products.id, products.sku, products.name, 'INITIAL', products.quantity,
+    0, products.quantity, 'Opening balance migrated from existing inventory', 'System'
+  FROM products
+  WHERE NOT EXISTS (
+    SELECT 1 FROM inventory_movements WHERE inventory_movements.product_id = products.id
+  )
+`).run();
 
 module.exports = { db, hashPassword };

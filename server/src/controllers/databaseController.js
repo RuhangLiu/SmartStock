@@ -21,6 +21,13 @@ const TABLES = {
   },
   settings: {
     columns: ['id', 'store_name', 'store_email', 'default_threshold', 'admin_name', 'currency']
+  },
+  inventory_movements: {
+    columns: [
+      'id', 'product_id', 'product_sku', 'product_name', 'movement_type', 'quantity_change',
+      'quantity_before', 'quantity_after', 'reason', 'reference_type', 'reference_id',
+      'created_by', 'created_by_name', 'created_at'
+    ]
   }
 };
 
@@ -87,4 +94,3 @@ exports.getTableRows = (req, res) => {
     }
   });
 };
-
