@@ -23,6 +23,15 @@
 .brand-symbol { width: 42px; height: 42px; flex: 0 0 auto; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.45); border-radius: 50% 43% 47% 42%; font-size: 11px; letter-spacing: -.04em; }
 .login-brand-panel h1 { margin: 10px 0 16px; font: 700 clamp(42px, 5vw, 68px)/1.02 'Manrope'; letter-spacing: -.055em; position: relative; z-index: 2; }
 .login-brand-panel > div > p:not(.overline) { max-width: 480px; color: #c3d3df; line-height: 1.8; font-size: 14px; position: relative; z-index: 2; }
+.login-feature-list { max-width: 520px; margin-top: 24px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; position: relative; z-index: 2; }
+.login-feature-list article { min-height: 92px; padding: 12px; display: flex; align-items: flex-start; gap: 9px; border: 1px solid rgba(255,255,255,.14); border-radius: 10px; background: rgba(255,255,255,.07); backdrop-filter: blur(7px); }
+.login-feature-list article > span { color: #e5ae92; font-size: 9px; font-weight: 800; letter-spacing: .08em; }
+.login-feature-list strong, .login-feature-list small { display: block; }
+.login-feature-list strong { color: white; font-size: 11px; line-height: 1.35; }
+.login-feature-list small { margin-top: 5px; color: #abc1d1; font-size: 9px; line-height: 1.45; }
+.platform-guide-button { min-height: 37px; margin-top: 14px; padding: 0 14px; position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,.32); border-radius: 8px; color: white; background: rgba(255,255,255,.08); font-size: 10px; font-weight: 800; }
+.platform-guide-button:hover { background: rgba(255,255,255,.14); }
+.platform-guide-button span { color: #e5ae92; font-size: 14px; }
 .overline { margin: 0 0 6px; color: var(--terra); font-size: 9px; font-weight: 800; letter-spacing: .16em; }
 .overline.light { color: #e5ae92; }
 .login-footnote { position: relative; z-index: 2; color: #88a8c0; font-size: 10px; letter-spacing: .08em; }
@@ -52,6 +61,17 @@ input:focus, select:focus { outline: 3px solid rgba(23,75,120,.1); border-color:
 .signup-note { margin: 18px 0 0; color: var(--muted); text-align: center; font-size: 9px; line-height: 1.6; }
 .message { margin: 12px 0; padding: 11px 12px; border-radius: 7px; font-size: 11px; }
 .message.error { color: #8e3e35; background: #f9e8e4; border: 1px solid #edc8c1; }
+.platform-guide-backdrop { position: fixed; inset: 0; z-index: 100; padding: 24px; display: grid; place-items: center; background: rgba(7,26,42,.72); backdrop-filter: blur(8px); }
+.platform-guide-modal { width: min(650px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; padding: 32px; position: relative; color: var(--text); background: var(--surface); border-radius: 16px; box-shadow: 0 28px 80px rgba(0,0,0,.3); }
+.platform-guide-close { width: 34px; height: 34px; position: absolute; top: 18px; right: 18px; display: grid; place-items: center; border: 0; border-radius: 50%; color: var(--muted); background: #e9eeee; font-size: 21px; }
+.platform-guide-modal h2 { max-width: 500px; margin: 8px 42px 10px 0; color: var(--navy); font: 800 29px/1.15 'Manrope'; letter-spacing: -.045em; }
+.platform-guide-intro { max-width: 545px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.65; }
+.platform-guide-grid { margin: 25px 0; display: grid; gap: 9px; }
+.platform-guide-grid article { min-height: 86px; padding: 15px 16px; display: grid; grid-template-columns: 32px 1fr; gap: 10px; border: 1px solid var(--line); border-radius: 10px; background: #f4f6f4; }
+.platform-guide-grid article > span { color: var(--terra); font-size: 10px; font-weight: 800; letter-spacing: .08em; }
+.platform-guide-grid strong { color: var(--navy); font-size: 14px; }
+.platform-guide-grid p { margin: 4px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.platform-guide-done { min-width: 118px; float: right; }
 
 /* App frame */
 .app-loader { min-height: 100vh; display: grid; place-items: center; color: var(--navy); font-weight: 700; background: var(--paper); }
@@ -282,6 +302,9 @@ body { font-size: 16px; line-height: 1.5; }
 .brand-symbol { font-size: 13px; }
 .login-brand-panel > div > p:not(.overline) { font-size: 16px; line-height: 1.7; }
 .login-footnote { font-size: 12px; }
+.login-feature-list strong { font-size: 13px; }
+.login-feature-list small { font-size: 11px; }
+.platform-guide-button { min-height: 42px; font-size: 13px; }
 .login-form h2 { font-size: 34px; line-height: 1.15; }
 .form-note { margin-bottom: 22px; font-size: 15px; line-height: 1.55; }
 .auth-tabs { margin-bottom: 20px; }
@@ -395,7 +418,7 @@ td { padding: 13px 14px; font-size: 13px; }
   .ai-briefing-heading, .ai-briefing-empty { align-items: stretch; flex-direction: column; }
   .ai-briefing-actions { justify-content: space-between; }
   .movement-filters { grid-template-columns: 1fr 1fr; }
-  .login-screen { grid-template-columns: 1fr; }.login-brand-panel { height: 370px; min-height: 370px; padding: 35px; }.login-form-panel { padding: 82px 25px 45px; }
+  .login-screen { grid-template-columns: 1fr; }.login-brand-panel { height: auto; min-height: 650px; padding: 35px; }.login-form-panel { padding: 82px 25px 45px; }
 }
 
 @media (max-width: 580px) {
@@ -426,7 +449,7 @@ td { padding: 13px 14px; font-size: 13px; }
   .image-upload-field { align-items: stretch; flex-direction: column; }.image-file-button { width: 100%; }
   .bar-row { grid-template-columns: 78px 1fr 36px; }.compact-row { grid-template-columns: 1fr 48px 62px; }
   .report-hero { grid-template-columns: 1fr; }.report-hero > div { padding: 10px 0 0; border-left: 0; border-top: 1px solid rgba(255,255,255,.17); }
-  .login-brand-panel { height: 350px; min-height: 350px; }.login-brand-panel h1 { font-size: 38px; }.login-form-panel { padding-top: 82px; }.auth-language-toggle { top: 20px; right: 22px; }
+  .login-brand-panel { height: auto; min-height: 720px; }.login-brand-panel h1 { font-size: 38px; }.login-feature-list { grid-template-columns: 1fr; margin-top: 20px; }.login-feature-list article { min-height: 72px; }.login-form-panel { padding-top: 82px; }.auth-language-toggle { top: 20px; right: 22px; }.platform-guide-backdrop { padding: 12px; }.platform-guide-modal { max-height: calc(100vh - 24px); padding: 27px 20px 24px; }.platform-guide-close { top: 14px; right: 14px; }.platform-guide-modal h2 { font-size: 24px; }.platform-guide-grid article { padding: 13px; }
   .topbar .language-toggle { width: 82px; flex-basis: 82px; padding: 3px; }
   .topbar .language-toggle button { padding: 0 5px; }
 }
