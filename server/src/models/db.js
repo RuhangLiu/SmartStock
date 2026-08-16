@@ -104,6 +104,19 @@ CREATE TABLE IF NOT EXISTS inventory_movements (
   FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL,
   FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
+
+CREATE TABLE IF NOT EXISTS ai_activity_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER,
+  user_name TEXT NOT NULL,
+  language TEXT NOT NULL CHECK(language IN ('en', 'zh')),
+  provider TEXT NOT NULL,
+  status TEXT NOT NULL CHECK(status IN ('success', 'error')),
+  records_read INTEGER NOT NULL DEFAULT 0,
+  duration_ms INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
 `);
 
 function addColumnIfMissing(table, column, definition) {
@@ -125,6 +138,7 @@ addColumnIfMissing('sales', 'sales_channel', "TEXT DEFAULT 'Online Store'");
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_products_sku ON products(sku) WHERE sku IS NOT NULL;');
 db.exec('CREATE INDEX IF NOT EXISTS idx_inventory_movements_product ON inventory_movements(product_id, created_at DESC);');
 db.exec('CREATE INDEX IF NOT EXISTS idx_inventory_movements_type ON inventory_movements(movement_type, created_at DESC);');
+db.exec('CREATE INDEX IF NOT EXISTS idx_ai_activity_logs_created_at ON ai_activity_logs(created_at DESC);');
 
 function hashPassword(password) {
   const salt = randomBytes(16).toString('hex');

@@ -102,3 +102,19 @@ CREATE INDEX IF NOT EXISTS idx_inventory_movements_product
 
 CREATE INDEX IF NOT EXISTS idx_inventory_movements_type
   ON inventory_movements(movement_type, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS ai_activity_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER,
+  user_name TEXT NOT NULL,
+  language TEXT NOT NULL CHECK(language IN ('en', 'zh')),
+  provider TEXT NOT NULL,
+  status TEXT NOT NULL CHECK(status IN ('success', 'error')),
+  records_read INTEGER NOT NULL DEFAULT 0,
+  duration_ms INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_activity_logs_created_at
+  ON ai_activity_logs(created_at DESC);

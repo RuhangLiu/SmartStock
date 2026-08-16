@@ -66,6 +66,8 @@ export const fetchSales = () => request('/sales');
 export const createSale = (sale) =>
   request('/sales', { method: 'POST', body: JSON.stringify(sale) });
 export const fetchReport = () => request('/sales/report');
+export const generateAiBriefing = (language = 'en') =>
+  request('/ai/briefing', { method: 'POST', body: JSON.stringify({ language }) });
 
 export const fetchOrders = () => request('/orders');
 export const addOrder = (order) =>
