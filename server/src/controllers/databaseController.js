@@ -28,6 +28,12 @@ const TABLES = {
       'quantity_before', 'quantity_after', 'reason', 'reference_type', 'reference_id',
       'created_by', 'created_by_name', 'created_at'
     ]
+  },
+  ai_activity_logs: {
+    columns: [
+      'id', 'user_id', 'user_name', 'language', 'provider', 'status',
+      'records_read', 'duration_ms', 'created_at'
+    ]
   }
 };
 

@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { money, orderStatusClass, stockStatus } from '../utils';
 import { useI18n } from '../i18n';
+import { generateAiBriefing } from '../services/api';
 
 function MetricCard({ label, value, note, tone = 'indigo', icon }) {
   return (
@@ -12,10 +14,37 @@ function MetricCard({ label, value, note, tone = 'indigo', icon }) {
 }
 
 function DashboardPage({ products, lowStock, orders, customers, report, settings, user, loading, onNavigate }) {
-  const { t } = useI18n();
+  const { language, t } = useI18n();
+  const [briefing, setBriefing] = useState(null);
+  const [briefingError, setBriefingError] = useState('');
+  const [briefingLoading, setBriefingLoading] = useState(false);
   const categories = report?.by_category || [];
   const maxCategory = Math.max(...categories.map((item) => Number(item.quantity)), 1);
   const inventoryTotal = Number(report?.total_inventory || 0);
+
+  useEffect(() => {
+    setBriefing(null);
+    setBriefingError('');
+  }, [language]);
+
+  const generateBriefing = async (event) => {
+    event?.preventDefault();
+    setBriefingLoading(true);
+    setBriefingError('');
+    try {
+      setBriefing(await generateAiBriefing(language));
+    } catch (error) {
+      setBriefingError(t(error.message));
+    } finally {
+      setBriefingLoading(false);
+    }
+  };
+
+  const generatedAt = briefing?.generated_at
+    ? new Intl.DateTimeFormat(language === 'zh' ? 'zh-CN' : 'en-US', {
+      dateStyle: 'medium', timeStyle: 'short'
+    }).format(new Date(briefing.generated_at))
+    : '';
 
   return (
     <div className={loading ? 'content-loading' : ''}>
@@ -39,6 +68,81 @@ function DashboardPage({ products, lowStock, orders, customers, report, settings
         <MetricCard label={t('Inventory Cost')} value={money(report?.inventory_cost, settings?.currency)} note={t('Current landed cost')} tone="indigo" icon="$" />
         <MetricCard label={t('Best Seller')} value={report?.best_seller?.name || t('No sales yet')} note={report?.best_seller ? t('{count} units sold', { count: report.best_seller.units }) : t('Record a sale to begin')} tone="orange" icon="★" />
       </section>
+
+      {user.role === 'admin' && (
+        <section className={`panel ai-briefing-panel ${briefing ? 'has-briefing' : ''}`}>
+          <div className="ai-briefing-heading">
+            <div className="ai-briefing-title">
+              <span className="ai-symbol">AI</span>
+              <div>
+                <p className="overline">{t('READ-ONLY OPERATIONS INSIGHT')}</p>
+                <h3>{t('AI Operations Briefing')}</h3>
+                <p>{t('Review a concise summary built from approved inventory, sales, and order data.')}</p>
+              </div>
+            </div>
+            <form className="ai-briefing-actions" onSubmit={generateBriefing}>
+              <span className="preview-badge">● {t(
+                briefing?.mode === 'azure-ai'
+                  ? 'AZURE AI'
+                  : briefing?.mode === 'local-fallback'
+                    ? 'LOCAL FALLBACK'
+                    : 'SECURE AI'
+              )}</span>
+              <button className="primary-button" type="submit" disabled={briefingLoading}>
+                {t(briefingLoading ? 'Generating briefing…' : briefing ? 'Refresh Briefing' : 'Generate AI Briefing')}
+              </button>
+            </form>
+          </div>
+
+          {briefingError && <div className="message error">{briefingError}</div>}
+
+          {!briefing && !briefingLoading && (
+            <div className="ai-briefing-empty">
+              <div>
+                <strong>{t('See what needs attention now')}</strong>
+                <p>{t('AI reviews approved operational summaries only. If Azure is unavailable, a safe local summary is used automatically.')}</p>
+              </div>
+              <div className="ai-scope-list">
+                <span>✓ {t('Inventory health')}</span>
+                <span>✓ {t('Recent sales')}</span>
+                <span>✓ {t('Open orders')}</span>
+                <span>✓ {t('No database changes')}</span>
+              </div>
+            </div>
+          )}
+
+          {briefingLoading && (
+            <div className="ai-briefing-loading" role="status">
+              <span /><div><strong>{t('Reviewing approved data…')}</strong><small>{t('Inventory · Sales · Orders')}</small></div>
+            </div>
+          )}
+
+          {briefing && !briefingLoading && (
+            <div className="ai-briefing-content">
+              <div className="ai-summary">
+                <span>{t('EXECUTIVE SUMMARY')}</span>
+                <p>{briefing.summary}</p>
+                <small>{t('Generated {time} · Read only', { time: generatedAt })}</small>
+              </div>
+              <div className="ai-insight-grid">
+                {briefing.insights.map((insight, index) => (
+                  <article className={`ai-insight ${insight.tone}`} key={`${insight.title}-${index}`}>
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    <div><strong>{insight.title}</strong><p>{insight.detail}</p></div>
+                  </article>
+                ))}
+              </div>
+              <div className="ai-scope-footer">
+                <span>{t('{count} products', { count: briefing.scope.products })}</span>
+                <span>{t('{count} low-stock items', { count: briefing.scope.low_stock_items })}</span>
+                <span>{t('{count} open orders', { count: briefing.scope.open_orders })}</span>
+                <span>{t('30-day sales window')}</span>
+                <span className="read-only-chip">🔒 {t('Read only')}</span>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="dashboard-layout">
         <div className="panel">

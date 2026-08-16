@@ -404,7 +404,44 @@ async function main() {
       return `200; ${res.payload.data.rows.length} filtered adjustment rows returned`;
     });
 
-    await runCase('TC-41', 'POST /api/auth/logout', 'Admin logs out', '200 and session invalidated', async () => {
+    await runCase('TC-41', 'POST /api/ai/briefing', 'Employee attempts to generate the administrator briefing', '403 Forbidden', async () => {
+      const res = await request(baseUrl, 'POST', '/api/ai/briefing', { language: 'en' }, employeeToken);
+      assert.equal(res.status, 403);
+      return `403; ${res.payload.message}`;
+    });
+
+    await runCase('TC-42', 'POST /api/ai/briefing', 'Admin generates the English local AI preview', '200 read-only briefing with four insights', async () => {
+      const res = await request(baseUrl, 'POST', '/api/ai/briefing', { language: 'en' }, adminToken);
+      assert.equal(res.status, 200);
+      assert.equal(res.payload.data.mode, 'local-preview');
+      assert.equal(res.payload.data.read_only, true);
+      assert.equal(res.payload.data.insights.length, 4);
+      assert.ok(res.payload.data.scope.products >= 8);
+      return `200; ${res.payload.data.insights.length} insights; read_only=${res.payload.data.read_only}`;
+    });
+
+    await runCase('TC-43', 'POST /api/ai/briefing', 'Admin generates the Chinese local AI preview', '200 localized briefing without sensitive fields', async () => {
+      const res = await request(baseUrl, 'POST', '/api/ai/briefing', { language: 'zh' }, adminToken);
+      assert.equal(res.status, 200);
+      assert.match(res.payload.data.summary, /商品|库存|订单/);
+      const serialized = JSON.stringify(res.payload.data);
+      assert.ok(!serialized.includes('password_hash'));
+      assert.ok(!serialized.includes(adminToken));
+      return '200; Chinese briefing returned without password or session data';
+    });
+
+    await runCase('TC-44', 'GET /api/database/ai_activity_logs', 'Admin reviews the safe AI activity audit log', '200 with two successful events and no prompt or token fields', async () => {
+      const res = await request(baseUrl, 'GET', '/api/database/ai_activity_logs?page=1&page_size=10', null, adminToken);
+      assert.equal(res.status, 200);
+      assert.equal(res.payload.data.rows.length, 2);
+      assert.ok(res.payload.data.rows.every((row) => row.provider === 'local-preview' && row.status === 'success'));
+      const columnNames = res.payload.data.columns.map((column) => column.name);
+      assert.ok(!columnNames.includes('prompt'));
+      assert.ok(!columnNames.includes('token'));
+      return '200; two audit events returned without prompt or token columns';
+    });
+
+    await runCase('TC-45', 'POST /api/auth/logout', 'Admin logs out', '200 and session invalidated', async () => {
       const res = await request(baseUrl, 'POST', '/api/auth/logout', null, adminToken);
       assert.equal(res.status, 200);
       const me = await request(baseUrl, 'GET', '/api/auth/me', null, adminToken);
