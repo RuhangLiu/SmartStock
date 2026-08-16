@@ -68,7 +68,17 @@ function AuthScreen({ onLogin, onSignup }) {
   const [form, setForm] = useState({ name: '', email: 'admin@smartstock.com', password: 'admin123', confirmPassword: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [showPlatformGuide, setShowPlatformGuide] = useState(false);
   const isSignup = mode === 'signup';
+
+  useEffect(() => {
+    if (!showPlatformGuide) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setShowPlatformGuide(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [showPlatformGuide]);
 
   const switchMode = (nextMode) => {
     setMode(nextMode);
@@ -108,6 +118,23 @@ function AuthScreen({ onLogin, onSignup }) {
           <p className="overline light">{t('INVENTORY · SALES · INSIGHT')}</p>
           <h1>{t('Run the store.')}<br />{t('Respect the craft.')}</h1>
           <p>{t('One workspace for products, inventory, sales, and cross-border operations.')}</p>
+          <div className="login-feature-list" aria-label={t('Platform capabilities')}>
+            <article>
+              <span>01</span>
+              <div><strong>{t('Inventory Control')}</strong><small>{t('Products, stock levels, and movement history.')}</small></div>
+            </article>
+            <article>
+              <span>02</span>
+              <div><strong>{t('Global Operations')}</strong><small>{t('Sales, orders, and customer management.')}</small></div>
+            </article>
+            <article>
+              <span>03</span>
+              <div><strong>{t('AI Briefing')}</strong><small>{t('Read-only operational insights powered by Azure AI.')}</small></div>
+            </article>
+          </div>
+          <button className="platform-guide-button" type="button" onClick={() => setShowPlatformGuide(true)}>
+            {t('About This Platform')} <span aria-hidden="true">↗</span>
+          </button>
         </div>
         <p className="login-footnote">Indigo Trail Studio · {t('Global Store')}</p>
       </section>
@@ -135,6 +162,31 @@ function AuthScreen({ onLogin, onSignup }) {
           {isSignup && <p className="signup-note">{t('New accounts use the employee role. An administrator can promote or manage staff access.')}</p>}
         </form>
       </section>
+      {showPlatformGuide && (
+        <div className="platform-guide-backdrop" onMouseDown={() => setShowPlatformGuide(false)}>
+          <section className="platform-guide-modal" role="dialog" aria-modal="true" aria-labelledby="platform-guide-title" onMouseDown={(event) => event.stopPropagation()}>
+            <button className="platform-guide-close" type="button" onClick={() => setShowPlatformGuide(false)} aria-label={t('Close platform guide')}>×</button>
+            <p className="overline">{t('SMARTSTOCK OVERVIEW')}</p>
+            <h2 id="platform-guide-title">{t('One workspace for internal operations')}</h2>
+            <p className="platform-guide-intro">{t('SmartStock is an internal management platform for tie-dye businesses, not a consumer storefront.')}</p>
+            <div className="platform-guide-grid">
+              <article>
+                <span>01</span>
+                <div><strong>{t('Role-based access')}</strong><p>{t('Administrators manage the full workspace. Employees use approved daily operation tools.')}</p></div>
+              </article>
+              <article>
+                <span>02</span>
+                <div><strong>{t('Read-only AI')}</strong><p>{t('Azure AI reads approved operational summaries and cannot change inventory, orders, or database records.')}</p></div>
+              </article>
+              <article>
+                <span>03</span>
+                <div><strong>{t('Persistent business data')}</strong><p>{t('Business records and uploaded product images are stored with the Azure application.')}</p></div>
+              </article>
+            </div>
+            <button className="primary-button platform-guide-done" type="button" onClick={() => setShowPlatformGuide(false)}>{t('Got it')}</button>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
