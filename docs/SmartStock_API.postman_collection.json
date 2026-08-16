@@ -1168,6 +1168,71 @@
           ]
         }
       ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {
+          "name": "POST Generate AI operations briefing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ai/briefing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "briefing"
+              ]
+            },
+            "description": "Generates a bilingual, administrator-only, read-only operations briefing from allowlisted inventory, sales, and order aggregates. Production uses Azure AI through Managed Identity and automatically falls back to a deterministic local summary if Azure is unavailable. Access: Admin.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"language\": \"en\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('AI briefing is returned', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Briefing is read only and contains insights', function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data.read_only).to.eql(true);",
+                  "  pm.expect(body.data.insights).to.be.an('array').that.is.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "variable": [
