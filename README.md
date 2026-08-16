@@ -4,12 +4,12 @@ SmartStock is an English-language capstone application for managing the products
 
 ## Capstone deliverables
 
-- 25 REST API endpoints, including public signup, local product-image upload, inventory movement history, and the read-only database viewer
+- 26 REST API endpoints, including public signup, local product-image upload, inventory movement history, the read-only database viewer, and an administrator-only AI operations briefing
 - Expected input, output, sample JSON, access rules, and error behavior
-- SQLite database design with 8 tables and an entity relationship diagram
+- SQLite database design with 9 tables and an entity relationship diagram
 - Bearer-token authentication with administrator and employee roles
 - Automated HTTP integration tests
-- 41 of 41 tests passed
+- 45 of 45 tests passed
 - Postman collection for manual API demonstration
 - English sign-in and employee registration interface
 - Image-enabled product catalog with eight original tie-dye product photographs
@@ -18,6 +18,7 @@ SmartStock is an English-language capstone application for managing the products
 - Administrator-only read-only database viewer with search and pagination
 - Complete inventory movement history with before/after balances, operator, reason, filters, and pagination
 - Administrator-only manual inventory adjustments with employee read-only access and negative-stock protection
+- Administrator-only bilingual Azure AI operations briefing with managed identity, allowlisted aggregate data, audit logging, and a safe local fallback
 
 ## Technology
 
@@ -78,9 +79,15 @@ SMARTSTOCK_DB_PATH=/home/data/smartstock.db
 SMARTSTOCK_UPLOAD_DIR=/home/data/uploads/products
 WEBSITES_ENABLE_APP_SERVICE_STORAGE=true
 SCM_DO_BUILD_DURING_DEPLOYMENT=true
+AZURE_OPENAI_ENABLED=true
+AZURE_OPENAI_ENDPOINT=https://dyedwild-smartstock-ai.openai.azure.com
+AZURE_OPENAI_DEPLOYMENT=smartstock-ai-mini
+AZURE_OPENAI_TIMEOUT_MS=12000
 ```
 
 The `/home/data` path keeps the SQLite database on App Service persistent storage. The Free F1 plan should remain at one instance because SQLite is intended for this capstone demonstration workload, not multi-instance production scaling.
+
+The production AI integration uses the App Service system-assigned managed identity with the `Cognitive Services OpenAI User` role scoped only to the `dyedwild-smartstock-ai` resource. No Azure AI API key is stored in the browser, repository, or App Service settings. If Azure AI is unavailable, the endpoint returns a deterministic local read-only briefing instead.
 
 ## Run the API test suite
 
@@ -92,7 +99,7 @@ npm test
 Expected result:
 
 ```text
-SmartStock API tests: 41/41 passed
+SmartStock API tests: 45/45 passed
 ```
 
 The test runner uses an isolated temporary SQLite database and an ephemeral local HTTP port. It does not modify the demonstration database.
@@ -109,6 +116,7 @@ The test runner uses an isolated temporary SQLite database and an ephemeral loca
 | Settings | 2 | Read and update |
 | Inventory | 2 | Read movement history and perform administrator-only documented stock adjustments |
 | Database | 2 | List approved tables and view searched, paginated rows |
+| AI | 1 | Generate an administrator-only bilingual, read-only operations briefing with Azure AI and local fallback |
 
 All protected business endpoints require a bearer token. Administrative mutations are protected by role middleware. Public signup creates an employee account and immediately returns an authenticated session.
 
@@ -125,6 +133,8 @@ All protected business endpoints require a bearer token. Administrative mutation
 - Product creation, quantity edits, sales, and manual adjustments automatically create immutable inventory movement records.
 - Every movement stores its signed change, before/after balance, operator, reason, timestamp, and source reference.
 - Inventory changes and their corresponding movement records are committed in the same transaction.
+- AI requests read only predefined inventory, sales, and order aggregates, return at most four insights, and never execute SQL or modify business records.
+- AI activity logging records provider, status, language, record count, duration, and user identity without storing prompts, access tokens, passwords, or session tokens.
 - A product with sales history cannot be deleted.
 
 ## Documentation
@@ -142,8 +152,8 @@ All protected business endpoints require a bearer token. Administrative mutation
 The finalized submission was executed against the exact backend source included in this repository:
 
 ```text
-41 tests executed
-41 tests passed
+45 tests executed
+45 tests passed
 0 tests failed
 100% pass rate
 ```
