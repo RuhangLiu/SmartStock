@@ -8,6 +8,7 @@ router.post('/orders', requireRole('admin'), controller.addOrder);
 router.put('/orders/:id', requireRole('admin'), controller.updateOrder);
 router.get('/customers', controller.getCustomers);
 router.post('/customers', requireRole('admin'), controller.addCustomer);
+router.delete('/customers/:id', requireRole('admin'), controller.deleteCustomer);
 router.get('/settings', controller.getSettings);
 router.put('/settings', requireRole('admin'), controller.updateSettings);
 
