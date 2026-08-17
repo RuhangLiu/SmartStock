@@ -47,6 +47,20 @@ exports.addCustomer = (req, res) => {
   res.status(201).json({ success: true, data: db.prepare('SELECT * FROM customers WHERE id = ?').get(info.lastInsertRowid) });
 };
 
+exports.deleteCustomer = (req, res) => {
+  const customerId = Number(req.params.id);
+  const customer = Number.isInteger(customerId) && customerId > 0
+    ? db.prepare('SELECT * FROM customers WHERE id = ?').get(customerId)
+    : null;
+  if (!customer) return res.status(404).json({ success: false, message: 'Customer not found' });
+  if (Number(customer.total_purchases) > 0) {
+    return res.status(409).json({ success: false, message: 'Customers with purchase history cannot be deleted' });
+  }
+
+  db.prepare('DELETE FROM customers WHERE id = ?').run(customerId);
+  res.json({ success: true, data: { id: customerId, name: customer.name } });
+};
+
 exports.getSettings = (req, res) => {
   res.json({ success: true, data: db.prepare('SELECT * FROM settings WHERE id = 1').get() });
 };

@@ -4,7 +4,7 @@ SmartStock is an English-language capstone application for managing the products
 
 ## Capstone deliverables
 
-- 26 REST API endpoints, including public signup, local product-image upload, inventory movement history, the read-only database viewer, and an administrator-only AI operations briefing
+- 27 REST API endpoints, including public signup, local product-image upload, inventory movement history, protected customer deletion, the read-only database viewer, and an administrator-only AI operations briefing
 - Expected input, output, sample JSON, access rules, and error behavior
 - SQLite database design with 9 tables and an entity relationship diagram
 - Bearer-token authentication with administrator and employee roles
@@ -112,7 +112,7 @@ The test runner uses an isolated temporary SQLite database and an ephemeral loca
 | Products | 6 | Catalog, search, low stock, local image upload, create, update, delete |
 | Sales | 3 | Sales history, record sale, aggregated report |
 | Orders | 3 | List, create, update status |
-| Customers | 2 | List and create |
+| Customers | 3 | List, create, and safely delete customers without purchase history |
 | Settings | 2 | Read and update |
 | Inventory | 2 | Read movement history and perform administrator-only documented stock adjustments |
 | Database | 2 | List approved tables and view searched, paginated rows |

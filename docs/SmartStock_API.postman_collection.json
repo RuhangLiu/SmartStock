@@ -829,6 +829,49 @@
           },
           "response": [],
           "event": []
+        },
+        {
+          "name": "DELETE Delete customer",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "customers",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "4",
+                  "description": "Customer ID with no purchase history"
+                }
+              ]
+            },
+            "description": "Deletes a customer only when total purchases are zero. Customers with purchase history return 409 Conflict. Access: Admin.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": []
         }
       ]
     },
