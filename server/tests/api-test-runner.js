@@ -15,6 +15,7 @@ let employeeToken = '';
 let saleProductId = 0;
 let deletableProductId = 0;
 let orderId = 0;
+let customerId = 0;
 
 async function request(baseUrl, method, endpoint, body, token) {
   const response = await fetch(`${baseUrl}${endpoint}`, {
@@ -205,7 +206,8 @@ async function main() {
       }, adminToken);
       assert.equal(res.status, 201);
       assert.equal(res.payload.data.region, 'Canada');
-      return `201; customer id=${res.payload.data.id}`;
+      customerId = Number(res.payload.data.id);
+      return `201; customer id=${customerId}`;
     });
 
     await runCase('TC-19', 'PUT /api/settings', 'Admin updates store settings', '200 and saved currency', async () => {
@@ -260,11 +262,27 @@ async function main() {
       return `200; ${res.payload.data.length} orders returned; created order found`;
     });
 
-    await runCase('TC-25', 'GET /api/customers', 'Retrieve the customer directory', '200 and created customer included', async () => {
-      const res = await request(baseUrl, 'GET', '/api/customers', null, adminToken);
-      assert.equal(res.status, 200);
-      assert.ok(res.payload.data.some((customer) => customer.email === 'test.customer@example.com'));
-      return `200; ${res.payload.data.length} customers returned; created customer found`;
+    await runCase('TC-25', 'GET + DELETE /api/customers/:id', 'Retrieve customers and enforce protected admin deletion', 'Purchase history protected; employee blocked; empty customer deleted', async () => {
+      const list = await request(baseUrl, 'GET', '/api/customers', null, adminToken);
+      assert.equal(list.status, 200);
+      assert.ok(list.payload.data.some((customer) => Number(customer.id) === customerId));
+
+      const protectedCustomer = list.payload.data.find((customer) => Number(customer.total_purchases) > 0);
+      assert.ok(protectedCustomer);
+      const protectedDelete = await request(baseUrl, 'DELETE', `/api/customers/${protectedCustomer.id}`, null, adminToken);
+      assert.equal(protectedDelete.status, 409);
+
+      const employeeDelete = await request(baseUrl, 'DELETE', `/api/customers/${customerId}`, null, employeeToken);
+      assert.equal(employeeDelete.status, 403);
+
+      const deleted = await request(baseUrl, 'DELETE', `/api/customers/${customerId}`, null, adminToken);
+      assert.equal(deleted.status, 200);
+      assert.equal(Number(deleted.payload.data.id), customerId);
+
+      const afterDelete = await request(baseUrl, 'GET', '/api/customers', null, adminToken);
+      assert.equal(afterDelete.status, 200);
+      assert.ok(!afterDelete.payload.data.some((customer) => Number(customer.id) === customerId));
+      return `200; protected=${protectedDelete.status}; employee=${employeeDelete.status}; deleted id=${customerId}`;
     });
 
     await runCase('TC-26', 'GET /api/settings', 'Retrieve current store settings', '200 and updated settings returned', async () => {

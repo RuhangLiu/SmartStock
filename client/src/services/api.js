@@ -78,6 +78,8 @@ export const updateOrder = (id, status) =>
 export const fetchCustomers = () => request('/customers');
 export const addCustomer = (customer) =>
   request('/customers', { method: 'POST', body: JSON.stringify(customer) });
+export const deleteCustomer = (id) =>
+  request(`/customers/${id}`, { method: 'DELETE' });
 
 export const fetchSettings = () => request('/settings');
 export const updateSettings = (settings) =>
