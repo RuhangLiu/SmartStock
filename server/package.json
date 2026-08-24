@@ -1,5 +1,5 @@
 {
-  "name": "capstone-server",
+  "name": "smartstock-server",
   "version": "1.0.0",
   "description": "SmartStock inventory and sales management backend API",
   "main": "index.js",

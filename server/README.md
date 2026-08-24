@@ -69,4 +69,4 @@ The SQLite database is created automatically at `database/smartstock.db` on firs
 - Sale creation and inventory reduction use a single database transaction.
 - Products with sales history cannot be deleted.
 
-See `API_Documentation.pdf` and `Database_Design.pdf` in the submission package for the complete specification.
+See `API_Documentation.pdf` and `Database_Design.pdf` in `docs/` for the complete specification.

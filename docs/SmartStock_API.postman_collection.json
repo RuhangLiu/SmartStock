@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "8d326ce8-8a77-4a86-8bde-smartstock2026",
     "name": "SmartStock Backend API",
-    "description": "Capstone API collection for SmartStock inventory and sales management.",
+    "description": "SmartStock inventory and sales management API collection.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [

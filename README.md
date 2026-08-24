@@ -1,8 +1,8 @@
 # SmartStock — Cross-Border Tie-Dye Inventory Platform
 
-SmartStock is an English-language capstone application for managing the products, inventory, sales, orders, customers, and settings of a cross-border tie-dye retailer. It combines a React frontend with an Express REST API and a persistent SQLite database.
+SmartStock is a staff-facing operations platform for managing the products, inventory, sales, orders, customers, and settings of a cross-border tie-dye business. It combines a React frontend with an Express REST API and a persistent SQLite database.
 
-## Capstone deliverables
+## Platform capabilities
 
 - 27 REST API endpoints, including public signup, local product-image upload, inventory movement history, protected customer deletion, the read-only database viewer, and an administrator-only AI operations briefing
 - Expected input, output, sample JSON, access rules, and error behavior
@@ -34,7 +34,7 @@ SmartStock is an English-language capstone application for managing the products
 .
 ├── client/                     # React frontend source
 ├── server/                     # Express API, SQLite integration, and tests
-├── docs/                       # API, database, SQL, Postman, and test documents
+├── docs/                       # Complete project documentation, diagrams, screenshots, and evidence
 ├── evidence/
 │   └── API_Test_Results.json   # Machine-readable test evidence
 └── README.md
@@ -85,7 +85,7 @@ AZURE_OPENAI_DEPLOYMENT=smartstock-ai-mini
 AZURE_OPENAI_TIMEOUT_MS=12000
 ```
 
-The `/home/data` path keeps the SQLite database on App Service persistent storage. The Free F1 plan should remain at one instance because SQLite is intended for this capstone demonstration workload, not multi-instance production scaling.
+The `/home/data` path keeps the SQLite database on App Service persistent storage. The Free F1 plan should remain at one instance because SQLite is intended for this single-instance operational workload, not multi-instance production scaling.
 
 The production AI integration uses the App Service system-assigned managed identity with the `Cognitive Services OpenAI User` role scoped only to the `dyedwild-smartstock-ai` resource. No Azure AI API key is stored in the browser, repository, or App Service settings. If Azure AI is unavailable, the endpoint returns a deterministic local read-only briefing instead.
 
@@ -139,6 +139,14 @@ All protected business endpoints require a bearer token. Administrative mutation
 
 ## Documentation
 
+- `docs/SmartStock_Project_Documentation.pdf`
+- `docs/README.md`
+- `docs/01_Production_Support_and_Testing.md`
+- `docs/02_System_Setup_Guide.md`
+- `docs/03_Issue_Diagnosis_and_Resolution.md`
+- `docs/04_System_Usage_Guide.md`
+- `docs/05_System_Architecture.md`
+- `docs/06_Deployment_and_Security.md`
 - `docs/API_Documentation.pdf`
 - `docs/Database_Design.pdf`
 - `docs/Database_Schema.sql`
@@ -149,7 +157,7 @@ All protected business endpoints require a bearer token. Administrative mutation
 
 ## Test result
 
-The finalized submission was executed against the exact backend source included in this repository:
+The finalized release was executed against the exact backend source included in this repository:
 
 ```text
 45 tests executed
