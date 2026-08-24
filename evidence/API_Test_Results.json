@@ -1,14 +1,14 @@
 {
   "project": "SmartStock Inventory and Sales Management System",
-  "executed_at": "2026-08-15T21:35:46.204Z",
+  "executed_at": "2026-08-24T19:30:07.301Z",
   "environment": {
     "runtime": "v24.18.0",
     "database": "Isolated temporary SQLite database",
     "transport": "HTTP on an ephemeral local port"
   },
   "summary": {
-    "total": 41,
-    "passed": 41,
+    "total": 45,
+    "passed": 45,
     "failed": 0,
     "pass_rate": "100.0%"
   },
@@ -20,7 +20,7 @@
       "expected": "200 and authentication token",
       "actual": "200; role=admin; token returned",
       "status": "Pass",
-      "duration_ms": 45
+      "duration_ms": 37
     },
     {
       "id": "TC-02",
@@ -56,7 +56,7 @@
       "expected": "200 and seeded catalog",
       "actual": "200; 8 products returned",
       "status": "Pass",
-      "duration_ms": 2
+      "duration_ms": 3
     },
     {
       "id": "TC-06",
@@ -74,7 +74,7 @@
       "expected": "201 and created product",
       "actual": "201; product id=9",
       "status": "Pass",
-      "duration_ms": 3
+      "duration_ms": 2
     },
     {
       "id": "TC-08",
@@ -101,7 +101,7 @@
       "expected": "200 with updated values",
       "actual": "200; quantity=12; price=30",
       "status": "Pass",
-      "duration_ms": 2
+      "duration_ms": 3
     },
     {
       "id": "TC-11",
@@ -110,7 +110,7 @@
       "expected": "200 and threshold-filtered list",
       "actual": "200; 2 low-stock products",
       "status": "Pass",
-      "duration_ms": 2
+      "duration_ms": 1
     },
     {
       "id": "TC-12",
@@ -119,7 +119,7 @@
       "expected": "201, server-calculated total, stock reduced",
       "actual": "201; total=60; stock reduced from 12 to 10",
       "status": "Pass",
-      "duration_ms": 3
+      "duration_ms": 4
     },
     {
       "id": "TC-13",
@@ -137,7 +137,7 @@
       "expected": "200 and recorded sale",
       "actual": "200; 1 sale returned",
       "status": "Pass",
-      "duration_ms": 2
+      "duration_ms": 1
     },
     {
       "id": "TC-15",
@@ -164,7 +164,7 @@
       "expected": "200 and In Transit status",
       "actual": "200; status=In Transit",
       "status": "Pass",
-      "duration_ms": 1
+      "duration_ms": 2
     },
     {
       "id": "TC-18",
@@ -186,12 +186,12 @@
     },
     {
       "id": "TC-20",
-      "api": "POST /api/auth/register",
-      "scenario": "Admin creates a staff account",
-      "expected": "201 and employee user",
-      "actual": "201; user id=3; role=employee",
+      "api": "POST /api/auth/register + POST /api/auth/signup",
+      "scenario": "Admin registration and public employee signup enforce staff roles",
+      "expected": "201 for both flows and employee role for public signup",
+      "actual": "201 register; 201 signup; public role=employee",
       "status": "Pass",
-      "duration_ms": 21
+      "duration_ms": 42
     },
     {
       "id": "TC-21",
@@ -200,7 +200,7 @@
       "expected": "409 Conflict",
       "actual": "409; Products with sales history cannot be deleted",
       "status": "Pass",
-      "duration_ms": 1
+      "duration_ms": 2
     },
     {
       "id": "TC-22",
@@ -231,12 +231,12 @@
     },
     {
       "id": "TC-25",
-      "api": "GET /api/customers",
-      "scenario": "Retrieve the customer directory",
-      "expected": "200 and created customer included",
-      "actual": "200; 4 customers returned; created customer found",
+      "api": "GET + DELETE /api/customers/:id",
+      "scenario": "Retrieve customers and enforce protected admin deletion",
+      "expected": "Purchase history protected; employee blocked; empty customer deleted",
+      "actual": "200; protected=409; employee=403; deleted id=4",
       "status": "Pass",
-      "duration_ms": 2
+      "duration_ms": 9
     },
     {
       "id": "TC-26",
@@ -252,9 +252,9 @@
       "api": "GET /api/database/tables",
       "scenario": "Admin retrieves the read-only database table catalog",
       "expected": "200 and approved table metadata",
-      "actual": "200; 8 approved tables returned",
+      "actual": "200; 9 approved tables returned",
       "status": "Pass",
-      "duration_ms": 1
+      "duration_ms": 2
     },
     {
       "id": "TC-28",
@@ -263,7 +263,7 @@
       "expected": "200, matching rows, and pagination metadata",
       "actual": "200; matching product row returned with pagination",
       "status": "Pass",
-      "duration_ms": 2
+      "duration_ms": 1
     },
     {
       "id": "TC-29",
@@ -299,14 +299,14 @@
       "expected": "400 validation error",
       "actual": "400; Only JPG, PNG, and WebP images are allowed",
       "status": "Pass",
-      "duration_ms": 1
+      "duration_ms": 3
     },
     {
       "id": "TC-33",
       "api": "POST /api/products/image",
       "scenario": "Admin uploads a valid local product image",
       "expected": "201, public URL, and persisted file",
-      "actual": "201; /uploads/products/6c13d802-cdad-445a-b929-962ebabb6479.png; file persisted and publicly readable",
+      "actual": "201; /uploads/products/5809f604-215b-4ad9-9f75-1fd63176620f.png; file persisted and publicly readable",
       "status": "Pass",
       "duration_ms": 5
     },
@@ -326,7 +326,7 @@
       "expected": "200 with movement rows",
       "actual": "200; employee can read 3 movements",
       "status": "Pass",
-      "duration_ms": 1
+      "duration_ms": 2
     },
     {
       "id": "TC-36",
@@ -335,7 +335,7 @@
       "expected": "403 Forbidden",
       "actual": "403; You do not have permission to perform this action",
       "status": "Pass",
-      "duration_ms": 2
+      "duration_ms": 1
     },
     {
       "id": "TC-37",
@@ -371,16 +371,52 @@
       "expected": "200 with matching adjustment rows and pagination",
       "actual": "200; 2 filtered adjustment rows returned",
       "status": "Pass",
-      "duration_ms": 1
+      "duration_ms": 2
     },
     {
       "id": "TC-41",
+      "api": "POST /api/ai/briefing",
+      "scenario": "Employee attempts to generate the administrator briefing",
+      "expected": "403 Forbidden",
+      "actual": "403; You do not have permission to perform this action",
+      "status": "Pass",
+      "duration_ms": 2
+    },
+    {
+      "id": "TC-42",
+      "api": "POST /api/ai/briefing",
+      "scenario": "Admin generates the English local AI preview",
+      "expected": "200 read-only briefing with four insights",
+      "actual": "200; 4 insights; read_only=true",
+      "status": "Pass",
+      "duration_ms": 9
+    },
+    {
+      "id": "TC-43",
+      "api": "POST /api/ai/briefing",
+      "scenario": "Admin generates the Chinese local AI preview",
+      "expected": "200 localized briefing without sensitive fields",
+      "actual": "200; Chinese briefing returned without password or session data",
+      "status": "Pass",
+      "duration_ms": 3
+    },
+    {
+      "id": "TC-44",
+      "api": "GET /api/database/ai_activity_logs",
+      "scenario": "Admin reviews the safe AI activity audit log",
+      "expected": "200 with two successful events and no prompt or token fields",
+      "actual": "200; two audit events returned without prompt or token columns",
+      "status": "Pass",
+      "duration_ms": 1
+    },
+    {
+      "id": "TC-45",
       "api": "POST /api/auth/logout",
       "scenario": "Admin logs out",
       "expected": "200 and session invalidated",
       "actual": "200 logout; former session returns 401",
       "status": "Pass",
-      "duration_ms": 4
+      "duration_ms": 3
     }
   ]
 }

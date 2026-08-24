@@ -220,14 +220,22 @@ async function main() {
       return '200; default threshold=6; currency=USD';
     });
 
-    await runCase('TC-20', 'POST /api/auth/register', 'Admin creates a staff account', '201 and employee user', async () => {
-      const res = await request(baseUrl, 'POST', '/api/auth/register', {
+    await runCase('TC-20', 'POST /api/auth/register + POST /api/auth/signup', 'Admin registration and public employee signup enforce staff roles', '201 for both flows and employee role for public signup', async () => {
+      const registerRes = await request(baseUrl, 'POST', '/api/auth/register', {
         name: 'Test Employee', email: 'test.employee@example.com',
         password: 'password123', role: 'employee'
       }, adminToken);
-      assert.equal(res.status, 201);
-      assert.equal(res.payload.data.role, 'employee');
-      return `201; user id=${res.payload.data.id}; role=employee`;
+      assert.equal(registerRes.status, 201);
+      assert.equal(registerRes.payload.data.role, 'employee');
+
+      const signupRes = await request(baseUrl, 'POST', '/api/auth/signup', {
+        name: 'Public Signup Employee', email: 'signup.employee@example.com',
+        password: 'password123', role: 'admin'
+      });
+      assert.equal(signupRes.status, 201);
+      assert.equal(signupRes.payload.data.user.role, 'employee');
+      assert.ok(signupRes.payload.data.token);
+      return `201 register; 201 signup; public role=${signupRes.payload.data.user.role}`;
     });
 
     await runCase('TC-21', 'DELETE /api/products/:id', 'Delete product that has sales history', '409 Conflict', async () => {

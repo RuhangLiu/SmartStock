@@ -34,7 +34,7 @@ SmartStock is an English-language capstone application for managing the products
 .
 ├── client/                     # React frontend source
 ├── server/                     # Express API, SQLite integration, and tests
-├── docs/                       # API, database, SQL, Postman, and test documents
+├── docs/                       # Complete Module 10 documentation, diagrams, screenshots, and evidence
 ├── evidence/
 │   └── API_Test_Results.json   # Machine-readable test evidence
 └── README.md
@@ -139,6 +139,14 @@ All protected business endpoints require a bearer token. Administrative mutation
 
 ## Documentation
 
+- `docs/SmartStock_Capstone_Project_Documentation.pdf`
+- `docs/README.md`
+- `docs/01_Production_Support_and_Testing.md`
+- `docs/02_System_Setup_Guide.md`
+- `docs/03_Issue_Diagnosis_and_Resolution.md`
+- `docs/04_System_Usage_Guide.md`
+- `docs/05_System_Architecture.md`
+- `docs/06_Deployment_and_Security.md`
 - `docs/API_Documentation.pdf`
 - `docs/Database_Design.pdf`
 - `docs/Database_Schema.sql`

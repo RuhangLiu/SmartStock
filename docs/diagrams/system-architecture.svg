@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">SmartStock system architecture</title>
+  <desc id="desc">Users access a React interface hosted by Azure App Service. Express REST endpoints authenticate users and coordinate SQLite, persistent product images, and an Azure AI read-only briefing through managed identity.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#315a72"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#12304a" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .title { font: 700 36px Arial, sans-serif; fill: #102f4a; }
+      .subtitle { font: 400 18px Arial, sans-serif; fill: #637786; }
+      .group { fill: #f7f4ee; stroke: #c9d4da; stroke-width: 2; }
+      .group-title { font: 700 18px Arial, sans-serif; fill: #c86445; letter-spacing: 2px; }
+      .box { fill: #ffffff; stroke: #9eb4bf; stroke-width: 2; filter: url(#shadow); }
+      .box-blue { fill: #e9f2f6; stroke: #2c6485; stroke-width: 2; filter: url(#shadow); }
+      .box-green { fill: #ebf5ef; stroke: #4c8b6f; stroke-width: 2; filter: url(#shadow); }
+      .box-amber { fill: #fff3e7; stroke: #c86445; stroke-width: 2; filter: url(#shadow); }
+      .label { font: 700 22px Arial, sans-serif; fill: #102f4a; }
+      .small { font: 400 16px Arial, sans-serif; fill: #516875; }
+      .tiny { font: 400 14px Arial, sans-serif; fill: #637786; }
+      .flow { stroke: #315a72; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .flow-dashed { stroke: #c86445; stroke-width: 3; stroke-dasharray: 9 7; fill: none; marker-end: url(#arrow); }
+      .flow-label { font: 700 14px Arial, sans-serif; fill: #315a72; }
+    </style>
+  </defs>
+
+  <rect width="1500" height="900" fill="#fbfaf7"/>
+  <text x="70" y="70" class="title">SmartStock System Architecture</text>
+  <text x="70" y="105" class="subtitle">Production deployment, security boundary, data flow, and external service dependencies</text>
+
+  <rect x="55" y="145" width="250" height="650" rx="24" class="group"/>
+  <text x="85" y="185" class="group-title">USERS</text>
+  <rect x="85" y="235" width="190" height="135" rx="18" class="box"/>
+  <text x="180" y="280" class="label" text-anchor="middle">Administrator</text>
+  <text x="180" y="315" class="small" text-anchor="middle">Full business access</text>
+  <text x="180" y="342" class="tiny" text-anchor="middle">AI and database viewer</text>
+  <rect x="85" y="420" width="190" height="135" rx="18" class="box"/>
+  <text x="180" y="465" class="label" text-anchor="middle">Employee</text>
+  <text x="180" y="500" class="small" text-anchor="middle">Operational access</text>
+  <text x="180" y="527" class="tiny" text-anchor="middle">Role-limited actions</text>
+  <rect x="85" y="605" width="190" height="120" rx="18" class="box"/>
+  <text x="180" y="650" class="label" text-anchor="middle">Browser</text>
+  <text x="180" y="685" class="small" text-anchor="middle">HTTPS</text>
+  <text x="180" y="712" class="tiny" text-anchor="middle">English / Chinese UI</text>
+
+  <rect x="360" y="145" width="610" height="650" rx="24" class="group"/>
+  <text x="390" y="185" class="group-title">AZURE APP SERVICE - DYEDWILD-SMARTSTOCK</text>
+  <rect x="405" y="235" width="240" height="145" rx="18" class="box-blue"/>
+  <text x="525" y="280" class="label" text-anchor="middle">React + Vite</text>
+  <text x="525" y="315" class="small" text-anchor="middle">Single-page interface</text>
+  <text x="525" y="343" class="tiny" text-anchor="middle">Static client/dist assets</text>
+  <rect x="690" y="235" width="240" height="145" rx="18" class="box-blue"/>
+  <text x="810" y="280" class="label" text-anchor="middle">Express API</text>
+  <text x="810" y="315" class="small" text-anchor="middle">27 REST endpoints</text>
+  <text x="810" y="343" class="tiny" text-anchor="middle">Bearer token + RBAC</text>
+
+  <rect x="405" y="465" width="240" height="165" rx="18" class="box-green"/>
+  <text x="525" y="510" class="label" text-anchor="middle">SQLite</text>
+  <text x="525" y="545" class="small" text-anchor="middle">9 application tables</text>
+  <text x="525" y="573" class="tiny" text-anchor="middle">/home/data/smartstock.db</text>
+  <text x="525" y="600" class="tiny" text-anchor="middle">WAL + foreign keys</text>
+  <rect x="690" y="465" width="240" height="165" rx="18" class="box-green"/>
+  <text x="810" y="510" class="label" text-anchor="middle">Product Images</text>
+  <text x="810" y="545" class="small" text-anchor="middle">JPG, PNG, WebP</text>
+  <text x="810" y="573" class="tiny" text-anchor="middle">/home/data/uploads/products</text>
+  <text x="810" y="600" class="tiny" text-anchor="middle">5 MB maximum</text>
+  <rect x="515" y="685" width="310" height="70" rx="18" class="box"/>
+  <text x="670" y="716" class="small" text-anchor="middle">Persistent /home storage</text>
+  <text x="670" y="742" class="tiny" text-anchor="middle">Single App Service instance</text>
+
+  <rect x="1025" y="145" width="420" height="650" rx="24" class="group"/>
+  <text x="1055" y="185" class="group-title">EXTERNAL SERVICES</text>
+  <rect x="1070" y="235" width="330" height="170" rx="18" class="box-amber"/>
+  <text x="1235" y="280" class="label" text-anchor="middle">Azure AI Foundry</text>
+  <text x="1235" y="315" class="small" text-anchor="middle">smartstock-ai-mini deployment</text>
+  <text x="1235" y="345" class="tiny" text-anchor="middle">Allowlisted aggregate data only</text>
+  <text x="1235" y="372" class="tiny" text-anchor="middle">Read-only briefing + safe fallback</text>
+  <rect x="1070" y="475" width="330" height="150" rx="18" class="box"/>
+  <text x="1235" y="520" class="label" text-anchor="middle">GitHub</text>
+  <text x="1235" y="555" class="small" text-anchor="middle">Source control and PR review</text>
+  <text x="1235" y="585" class="tiny" text-anchor="middle">Deployment Center integration</text>
+  <rect x="1070" y="680" width="330" height="75" rx="18" class="box"/>
+  <text x="1235" y="711" class="small" text-anchor="middle">Azure logs and deployment history</text>
+  <text x="1235" y="738" class="tiny" text-anchor="middle">Operational monitoring evidence</text>
+
+  <path d="M275 665 L405 307" class="flow"/>
+  <text x="310" y="470" class="flow-label" transform="rotate(-69 310 470)">HTTPS</text>
+  <path d="M645 307 L690 307" class="flow"/>
+  <text x="667" y="294" class="flow-label" text-anchor="middle">JSON</text>
+  <path d="M780 380 L575 465" class="flow"/>
+  <text x="665" y="420" class="flow-label">SQL</text>
+  <path d="M835 380 L835 465" class="flow"/>
+  <text x="850" y="430" class="flow-label">Files</text>
+  <path d="M810 235 C925 170 1010 250 1070 305" class="flow-dashed"/>
+  <text x="970" y="222" class="flow-label">Managed identity</text>
+  <path d="M1070 550 C1015 550 990 500 930 335" class="flow-dashed"/>
+  <text x="980" y="500" class="flow-label" transform="rotate(-72 980 500)">Deploy</text>
+  <path d="M525 630 L610 685" class="flow"/>
+  <path d="M810 630 L735 685" class="flow"/>
+
+  <text x="70" y="855" class="tiny">Security boundary: the browser never receives database credentials or Azure AI keys. Express enforces authentication, roles, validation, and data access.</text>
+</svg>
