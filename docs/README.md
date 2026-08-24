@@ -27,7 +27,6 @@ SmartStock is a staff-facing inventory and operations platform for a small cross
 - [Final API Test Cases, Results, and Endpoint Coverage](API_Test_Cases_and_Results.xlsx)
 - [Postman Collection](SmartStock_API.postman_collection.json)
 - [Automated Test Evidence](../evidence/API_Test_Results.json)
-- [Video Demonstration Checklist](VIDEO_DEMO_CHECKLIST.md)
 
 ## Verified Project Facts
 

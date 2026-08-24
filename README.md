@@ -152,7 +152,6 @@ All protected business endpoints require a bearer token. Administrative mutation
 - `docs/Database_Schema.sql`
 - `docs/API_Test_Cases_and_Results.xlsx`
 - `docs/SmartStock_API.postman_collection.json`
-- `docs/VIDEO_DEMO_CHECKLIST.md`
 - `evidence/API_Test_Results.json`
 
 ## Test result
